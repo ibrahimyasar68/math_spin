@@ -60,4 +60,41 @@ void main() {
     expect(find.text('TEKRAR DENE'), findsOneWidget);
     expect(find.text('SONRAKİ KATEGORİ'), findsNothing);
   });
+
+  testWidgets('Yüzde puanlama: her soru adedinde baraj geçilebilir',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(420, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const q = Question(
+      a: 1, b: 1, op: MathOp.add, result: 2, missing: MissingSlot.result,
+    );
+
+    Future<bool> passes(int total, int correct) async {
+      final results = <QuestionResult>[
+        for (var i = 0; i < correct; i++)
+          const QuestionResult(question: q, correct: true, givenAnswer: 2),
+        for (var i = 0; i < total - correct; i++)
+          const QuestionResult(question: q, correct: false, givenAnswer: 0),
+      ];
+      await tester.pumpWidget(
+        MaterialApp(home: ResultScreen(category: 3, results: results)),
+      );
+      await tester.pump();
+      return find.text('SONRAKİ KATEGORİ').evaluate().isNotEmpty;
+    }
+
+    // soru adedi -> geçmek için gereken en az doğru (%80 baraj).
+    const needed = {10: 8, 9: 8, 8: 7, 7: 6, 6: 5, 5: 4};
+
+    for (final entry in needed.entries) {
+      final total = entry.key;
+      final need = entry.value;
+
+      expect(await passes(total, need), isTrue,
+          reason: '$total soruda $need doğru barajı geçmeli');
+      expect(await passes(total, need - 1), isFalse,
+          reason: '$total soruda ${need - 1} doğru barajı geçmemeli');
+    }
+  });
 }

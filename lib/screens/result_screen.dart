@@ -15,8 +15,11 @@ import 'game_screen.dart';
 
 /// Kategori sonu özet ekranı.
 ///
-/// Her doğru 10 puandır; 80 puan ve üzeri (en az 8 doğru) bir üst
-/// kategoriye geçirir. Geçiş burada [ProgressStore]'a yazılır.
+/// Puan yüzde olarak hesaplanır (doğru / toplam × 100); 80 puan ve üzeri bir
+/// üst kategoriye geçirir. Soru adedi kategoriye göre değiştiği için (10'dan
+/// 5'e kadar) sabit "her doğru 10 puan" kuralı kullanılamaz: 7 soruluk bir
+/// kategoride en fazla 70 puan çıkar ve baraj asla geçilemezdi.
+/// Geçiş burada [ProgressStore]'a yazılır.
 class ResultScreen extends StatefulWidget {
   /// Oynanan kategori.
   final int category;
@@ -42,8 +45,8 @@ class _ResultScreenState extends State<ResultScreen> {
   int get _wrong => widget.results.length - _correct;
   int get _total => widget.results.length;
 
-  /// Her doğru 10 puan.
-  int get _score => _correct * 10;
+  /// Yüzde puan: doğru / toplam × 100 (soru adedinden bağımsız 0–100).
+  int get _score => _total == 0 ? 0 : (_correct * 100 / _total).round();
 
   bool get _passed => _score >= _passScore;
 
