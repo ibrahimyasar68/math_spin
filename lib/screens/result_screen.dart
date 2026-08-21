@@ -386,12 +386,19 @@ class _SummaryList extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      r.question.solvedPrompt,
-                      style: GoogleFonts.fredoka(
-                        fontSize: 22,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                    // Dört basamaklı sayılarla uzayan işlem satırı taşmasın.
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        r.question.solvedPrompt,
+                        maxLines: 1,
+                        softWrap: false,
+                        style: GoogleFonts.fredoka(
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     if (!r.correct)

@@ -262,17 +262,30 @@ class _ReelCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: height,
-      child: Center(
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.fredoka(
-            fontSize: 48,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-            shadows: const [
-              Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2)),
-            ],
+      // Çok basamaklı sayılar (ör. 4 basamaklı) hücreye sığmayıp satır
+      // sarmasın diye tek satıra zorlanır ve gerekirse küçültülür.
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.fredoka(
+                fontSize: 48,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                shadows: const [
+                  Shadow(
+                      color: Colors.black54,
+                      blurRadius: 4,
+                      offset: Offset(0, 2)),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -774,13 +774,23 @@ class _ResultCell extends StatelessWidget {
           scale: CurvedAnimation(parent: anim, curve: Curves.elasticOut),
           child: child,
         ),
-        child: Text(
-          text,
+        // Çok basamaklı sonuçlar kutuya sığmayıp satır sarmasın diye tek
+        // satıra zorlanır ve gerekirse küçültülür.
+        child: Padding(
           key: ValueKey(text),
-          style: GoogleFonts.fredoka(
-            fontSize: 48,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.fredoka(
+                fontSize: 48,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ),
@@ -817,12 +827,18 @@ class _RevealCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            question.solvedPrompt,
-            style: GoogleFonts.fredoka(
-              fontSize: 32,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+          // Dört basamaklı sayılarla uzayan işlem satırı taşmasın.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              question.solvedPrompt,
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.fredoka(
+                fontSize: 32,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
