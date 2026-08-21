@@ -13,7 +13,7 @@ class ProgressStore {
 
   static final ProgressStore instance = ProgressStore._();
 
-  static const int maxCategory = 50;
+  static const int maxCategory = 60;
   static const String _kCategory = 'player.category';
   static const String _kAvatar = 'player.avatarIndex';
 

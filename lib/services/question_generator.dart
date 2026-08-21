@@ -4,25 +4,24 @@ import '../models/question.dart';
 
 /// Seçilen kategoriye göre 10 soruluk bir set üretir.
 ///
-/// İşlemlerdeki sayıların basamak adedi kategori onluğuna bağlıdır; her 10
-/// kategoride bir artar. Sonucun basamak adedi ayrıca kısıtlanmaz, işlemin
-/// doğal çıktısıdır ("sonuç işleme bağlı").
+/// İşlemlerdeki sayıların basamak adedi kategori bandına bağlıdır. Sonucun
+/// basamak adedi ayrıca kısıtlanmaz, işlemin doğal çıktısıdır.
 ///
-///   - Kategori 1–9  : tek basamaklı sayılar   (1–9)
-///   - Kategori 10–19: iki basamaklı sayılar    (10–99)
-///   - Kategori 20–29: üç basamaklı sayılar     (100–999)
-///   - Kategori 30–39: dört basamaklı sayılar   (1000–9999)
-///   - Kategori 40–50: beş basamaklı sayılar    (10000–99999)
+///   - Kategori 1–15 : tek basamaklı sayılar   (1–9)
+///   - Kategori 16–30: iki basamaklı sayılar    (10–99)
+///   - Kategori 31–45: üç basamaklı sayılar     (100–999)  — %10 oranında
+///                     bazı sayılar 1–2 basamaklı da olabilir
+///   - Kategori 46–60: dört basamaklı sayılar   (1000–9999) — %15 oranında
+///                     bazı sayılar 1–3 basamaklı da olabilir
 ///
-/// Bant içi çeşitlilik: onluğun başında yalnız toplama/çıkarma, ortasında
-/// çarpma, sonunda bölme de eklenir (basamak adedi değişmez).
+/// Bant içi çeşitlilik: bandın başında yalnız toplama/çıkarma, ortasında
+/// çarpma, sonunda bölme de eklenir.
 ///
 /// Çarpma ve bölmede yalnız ilk sayı banda göre büyür; çarpan/bölen çocuk
-/// dostu ve sonuç girilebilir kalması için 2–9 aralığında tutulur (ör. beş
-/// basamaklı sayıyı tek basamaklı ile çarpma).
+/// dostu ve sonuç girilebilir kalması için 2–9 aralığında tutulur.
 class QuestionGenerator {
   static const int totalQuestions = 10;
-  static const int maxCategory = 50;
+  static const int maxCategory = 60;
 
   final int category;
   final Random _rng;
@@ -33,21 +32,57 @@ class QuestionGenerator {
 
   // ---- Kategori -> zorluk parametreleri -----------------------------------
 
-  /// Kategorinin basamak bandı: basamak adedi, sayı aralığı [lo, hi] ve
-  /// bandın kapsadığı ilk/son kategori.
-  ({int digits, int lo, int hi, int first, int last}) get _band {
-    if (category <= 9) return (digits: 1, lo: 1, hi: 9, first: 1, last: 9);
-    if (category <= 19) {
-      return (digits: 2, lo: 10, hi: 99, first: 10, last: 19);
+  /// Kategorinin basamak bandı: basamak adedi, sayı aralığı [lo, hi], bandın
+  /// kapsadığı ilk/son kategori ve daha küçük basamaklı sayı çıkma olasılığı
+  /// ([mixRatio]; 0 = yalnız bandın kendi basamağı).
+  ({int digits, int lo, int hi, int first, int last, double mixRatio})
+      get _band {
+    if (category <= 15) {
+      return (digits: 1, lo: 1, hi: 9, first: 1, last: 15, mixRatio: 0.0);
     }
-    if (category <= 29) {
-      return (digits: 3, lo: 100, hi: 999, first: 20, last: 29);
+    if (category <= 30) {
+      return (digits: 2, lo: 10, hi: 99, first: 16, last: 30, mixRatio: 0.0);
     }
-    if (category <= 39) {
-      return (digits: 4, lo: 1000, hi: 9999, first: 30, last: 39);
+    if (category <= 45) {
+      // %10 oranında 1–2 basamaklı sayılar da karışır.
+      return (digits: 3, lo: 100, hi: 999, first: 31, last: 45, mixRatio: 0.10);
     }
-    // 40–50 (50 son kategori)
-    return (digits: 5, lo: 10000, hi: 99999, first: 40, last: 50);
+    // 46–60 (60 son kategori): %15 oranında 1–3 basamaklı sayılar da karışır.
+    return (
+      digits: 4,
+      lo: 1000,
+      hi: 9999,
+      first: 46,
+      last: 60,
+      mixRatio: 0.15
+    );
+  }
+
+  /// Banttan bir işlem sayısı üretir.
+  ///
+  /// [mixRatio] olasılıkla daha küçük basamaklı (1..digits-1 arası rastgele
+  /// seçilen bir basamak adedinde) bir sayı döner; böylece üst bantlarda
+  /// arada kolay sayılar da görünür.
+  /// Bir sorunun sayılarının çekileceği aralık: [mixRatio] olasılıkla daha
+  /// küçük basamaklı bir aralık, aksi hâlde bandın kendi aralığı.
+  ({int lo, int hi}) _operandRange() {
+    final b = _band;
+    if (b.mixRatio > 0 && b.digits > 1 && _rng.nextDouble() < b.mixRatio) {
+      final digits = _between(1, b.digits - 1);
+      return (
+        lo: digits == 1 ? 1 : _pow10(digits - 1),
+        hi: _pow10(digits) - 1,
+      );
+    }
+    return (lo: b.lo, hi: b.hi);
+  }
+
+  int _pow10(int e) {
+    var v = 1;
+    for (var i = 0; i < e; i++) {
+      v *= 10;
+    }
+    return v;
   }
 
   /// Bandın içindeki ilerleme: 0.0 = bandın ilk kategorisi, 1.0 = sonuncusu.
@@ -75,15 +110,20 @@ class QuestionGenerator {
   Question _generate() {
     final pool = _opPool;
     final op = pool[_rng.nextInt(pool.length)];
+    // Karışım kararı soru başına bir kez verilir: "kolay" soruda sorunun tüm
+    // sayıları küçük basamaklıdır. Sayı başına karar verilseydi çıkarmadaki
+    // a >= b takası küçük sayıyı ikinci sıraya iter ve gözlenen oran
+    // [mixRatio]'nun altına düşerdi.
+    final range = _operandRange();
     switch (op) {
       case MathOp.add:
-        return _buildAddition();
+        return _buildAddition(range);
       case MathOp.sub:
-        return _buildSubtraction();
+        return _buildSubtraction(range);
       case MathOp.mul:
-        return _buildMultiplication();
+        return _buildMultiplication(range);
       case MathOp.div:
-        return _buildDivision();
+        return _buildDivision(range);
     }
   }
 
@@ -93,10 +133,9 @@ class QuestionGenerator {
   MissingSlot _randomMissing() =>
       _rng.nextBool() ? MissingSlot.result : MissingSlot.operandB;
 
-  Question _buildAddition() {
-    final b = _band;
-    final a = _between(b.lo, b.hi);
-    final bb = _between(b.lo, b.hi);
+  Question _buildAddition(({int lo, int hi}) range) {
+    final a = _between(range.lo, range.hi);
+    final bb = _between(range.lo, range.hi);
     return Question(
       a: a,
       b: bb,
@@ -106,11 +145,10 @@ class QuestionGenerator {
     );
   }
 
-  Question _buildSubtraction() {
-    final band = _band;
+  Question _buildSubtraction(({int lo, int hi}) range) {
     // Sonucun negatif olmaması için a >= b garanti edilir.
-    var a = _between(band.lo, band.hi);
-    var b = _between(band.lo, band.hi);
+    var a = _between(range.lo, range.hi);
+    var b = _between(range.lo, range.hi);
     if (b > a) {
       final tmp = a;
       a = b;
@@ -125,11 +163,11 @@ class QuestionGenerator {
     );
   }
 
-  Question _buildMultiplication() {
+  Question _buildMultiplication(({int lo, int hi}) range) {
     final band = _band;
     // İlk sayı banda göre büyür; çarpan tek basamaklı bantta banttan,
     // büyük bantlarda 2–9 arasından gelir (sonuç makul/girilebilir kalsın).
-    final a = _between(band.lo, band.hi);
+    final a = _between(range.lo, range.hi);
     final b = band.digits == 1 ? _between(1, 9) : _between(2, 9);
     return Question(
       a: a,
@@ -140,14 +178,13 @@ class QuestionGenerator {
     );
   }
 
-  Question _buildDivision() {
-    final band = _band;
+  Question _buildDivision(({int lo, int hi}) range) {
     // Bölünen (a) banda uyar ve tam bölünür: bölen ile bölümü seçip a'yı
     // türetiriz. Geçerli aralık bulunana kadar birkaç kez dener.
     for (var attempt = 0; attempt < 24; attempt++) {
       final divisor = _between(2, 9);
-      final maxQuotient = band.hi ~/ divisor;
-      final minQuotient = max(2, (band.lo + divisor - 1) ~/ divisor);
+      final maxQuotient = range.hi ~/ divisor;
+      final minQuotient = max(2, (range.lo + divisor - 1) ~/ divisor);
       if (minQuotient > maxQuotient) continue; // bu bölenle band'a sığmıyor
       final quotient = _between(minQuotient, maxQuotient);
       final a = divisor * quotient;
@@ -160,6 +197,6 @@ class QuestionGenerator {
       );
     }
     // Nadir geri dönüş (ör. çok dar band): çarpmaya düş.
-    return _buildMultiplication();
+    return _buildMultiplication(range);
   }
 }

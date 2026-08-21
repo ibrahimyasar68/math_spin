@@ -20,9 +20,9 @@ void main() {
 
     expect(find.text('MathSpin'), findsOneWidget);
     expect(find.text('BAŞLA'), findsOneWidget);
-    // Sadece bulunulan kategori gösterilir; toplam ("/ 50") yazılmaz.
+    // Sadece bulunulan kategori gösterilir; toplam ("/ 60") yazılmaz.
     expect(find.text('Kategori 1'), findsOneWidget);
-    expect(find.textContaining('/ 50'), findsNothing);
+    expect(find.textContaining('/ 60'), findsNothing);
   });
 
   test('Her kategori 10 soru üretir; bant başında yalnız toplama/çıkarma', () {
@@ -40,15 +40,12 @@ void main() {
     }
   });
 
-  test('İşlemlerdeki sayıların basamağı her 10 kategoride bir artar', () {
+  test('Alt bantlarda (1–30) sayılar tam olarak bandın basamağındadır', () {
     int digits(int n) => n.toString().length;
-    // kategori -> beklenen basamak sayısı (onluk bantlar)
+    // kategori -> beklenen basamak sayısı (karışım yok: mixRatio = 0)
     const bands = {
-      1: 1, 9: 1, // tek basamaklı
-      10: 2, 19: 2, // iki basamaklı
-      20: 3, 29: 3, // üç basamaklı
-      30: 4, 39: 4, // dört basamaklı
-      40: 5, 49: 5, 50: 5, // beş basamaklı
+      1: 1, 8: 1, 15: 1, // tek basamaklı
+      16: 2, 23: 2, 30: 2, // iki basamaklı
     };
 
     bands.forEach((cat, d) {
@@ -69,8 +66,43 @@ void main() {
     });
   });
 
+  test('Üst bantlarda sayılar bandın basamağını aşmaz; karışım oranı makuldür',
+      () {
+    int digits(int n) => n.toString().length;
+    // kategori -> (bandın basamağı, beklenen karışım oranı)
+    const bands = {
+      31: (3, 0.10), 38: (3, 0.10), 45: (3, 0.10),
+      46: (4, 0.15), 53: (4, 0.15), 60: (4, 0.15),
+    };
+
+    bands.forEach((cat, spec) {
+      final d = spec.$1;
+      final ratio = spec.$2;
+      var total = 0;
+      var smaller = 0;
+
+      for (var trial = 0; trial < 300; trial++) {
+        for (final q in QuestionGenerator(category: cat).generateAll()) {
+          // İlk sayı hiçbir zaman bandın basamağını aşmamalı.
+          expect(digits(q.a), lessThanOrEqualTo(d),
+              reason: 'kategori $cat ilk sayı: ${q.prompt}');
+          total++;
+          if (digits(q.a) < d) smaller++;
+        }
+      }
+
+      // Karışım kararı soru başına verildiği için gözlenen oran doğrudan
+      // mixRatio'ya oturur (işlem türünden bağımsız).
+      final observed = smaller / total;
+      expect(observed, greaterThan(0.0),
+          reason: 'kategori $cat: küçük basamaklı sayı hiç çıkmadı');
+      expect(observed, closeTo(ratio, 0.03),
+          reason: 'kategori $cat: karışım oranı ~$ratio olmalı, $observed');
+    });
+  });
+
   test('Bölme soruları her bantta tam sayı sonuç verir', () {
-    for (final cat in [7, 19, 35, 50]) {
+    for (final cat in [12, 28, 40, 60]) {
       final gen = QuestionGenerator(category: cat);
       for (var trial = 0; trial < 100; trial++) {
         for (final q in gen.generateAll().where((q) => q.op == MathOp.div)) {
@@ -96,8 +128,8 @@ void main() {
         reason: 'Kayıtlı avatar geri yüklenmeli');
 
     ProgressStore.instance.setCategory(99);
-    expect(ProgressStore.instance.category.value, 50,
-        reason: '50 son kategoridir, aşılamaz');
+    expect(ProgressStore.instance.category.value, 60,
+        reason: '60 son kategoridir, aşılamaz');
 
     ProgressStore.instance.setCategory(0);
     expect(ProgressStore.instance.category.value, 1);
