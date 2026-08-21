@@ -25,7 +25,7 @@ void main() {
     expect(find.textContaining('/ 60'), findsNothing);
   });
 
-  test('Her kategori 10 soru üretir; bant başında yalnız toplama/çıkarma', () {
+  test('Bant başı kategoride 10 soru; yalnız toplama/çıkarma', () {
     final qs = QuestionGenerator(category: 1).generateAll();
     expect(qs.length, 10);
 
@@ -38,6 +38,33 @@ void main() {
         expect(q.result >= 0, isTrue);
       }
     }
+  });
+
+  test('Soru adedi bant içindeki sıraya göre azalır (10..10,9,8,7,6,5)', () {
+    // Banttaki sıra -> beklenen soru adedi.
+    const expected = [
+      10, 10, 10, 10, 10, 10, 10, 10, 10, 10, // sıra 1–10
+      9, 8, 7, 6, 5, // sıra 11–15
+    ];
+
+    for (var band = 0; band < 4; band++) {
+      for (var pos = 1; pos <= 15; pos++) {
+        final cat = band * 15 + pos;
+        final want = expected[pos - 1];
+        expect(QuestionGenerator.questionCountFor(cat), want,
+            reason: 'kategori $cat (bant ${band + 1}, sıra $pos)');
+        expect(QuestionGenerator(category: cat).generateAll().length, want,
+            reason: 'kategori $cat üretilen soru adedi');
+      }
+    }
+
+    // Uç noktalar: çizelgedeki kritik kategoriler.
+    expect(QuestionGenerator.questionCountFor(10), 10);
+    expect(QuestionGenerator.questionCountFor(15), 5);
+    expect(QuestionGenerator.questionCountFor(16), 10);
+    expect(QuestionGenerator.questionCountFor(45), 5);
+    expect(QuestionGenerator.questionCountFor(46), 10);
+    expect(QuestionGenerator.questionCountFor(60), 5);
   });
 
   test('Alt bantlarda (1–30) sayılar tam olarak bandın basamağındadır', () {

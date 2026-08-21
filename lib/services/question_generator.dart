@@ -2,7 +2,11 @@ import 'dart:math';
 
 import '../models/question.dart';
 
-/// Seçilen kategoriye göre 10 soruluk bir set üretir.
+/// Seçilen kategoriye göre bir soru seti üretir.
+///
+/// Soru adedi bandın içindeki sıraya göre azalır: ilk 10 kategoride 10 soru,
+/// sonraki beş kategoride sırasıyla 9, 8, 7, 6 ve 5 soru. Bandın sonuna doğru
+/// sorular zorlaştığı için sayıları da azalır ([questionCountFor]).
 ///
 /// İşlemlerdeki sayıların basamak adedi kategori bandına bağlıdır. Sonucun
 /// basamak adedi ayrıca kısıtlanmaz, işlemin doğal çıktısıdır.
@@ -20,8 +24,22 @@ import '../models/question.dart';
 /// Çarpma ve bölmede yalnız ilk sayı banda göre büyür; çarpan/bölen çocuk
 /// dostu ve sonuç girilebilir kalması için 2–9 aralığında tutulur.
 class QuestionGenerator {
+  /// Bandın ilk 10 kategorisindeki (ve varsayılan) soru adedi.
   static const int totalQuestions = 10;
   static const int maxCategory = 60;
+
+  /// Bir bandın kapsadığı kategori adedi (1–15, 16–30, ...).
+  static const int _bandSize = 15;
+
+  /// [category] için soru adedi.
+  ///
+  /// Banttaki sıra 1–10 ise 10 soru; 11, 12, 13, 14, 15. sıralarda sırasıyla
+  /// 9, 8, 7, 6 ve 5 soru.
+  static int questionCountFor(int category) {
+    final pos = (category - 1) % _bandSize + 1; // banttaki sıra: 1..15
+    if (pos <= 10) return totalQuestions;
+    return totalQuestions - (pos - 10); // 11->9, 12->8, 13->7, 14->6, 15->5
+  }
 
   final int category;
   final Random _rng;
@@ -29,6 +47,9 @@ class QuestionGenerator {
   QuestionGenerator({this.category = 1, Random? rng})
       : assert(category >= 1 && category <= maxCategory),
         _rng = rng ?? Random();
+
+  /// Bu kategoride sorulacak soru adedi.
+  int get questionCount => questionCountFor(category);
 
   // ---- Kategori -> zorluk parametreleri -----------------------------------
 
@@ -102,9 +123,9 @@ class QuestionGenerator {
 
   // ---- Üretim --------------------------------------------------------------
 
-  /// Bu kategori için 10 soruluk listeyi üretir.
+  /// Bu kategori için soru listesini üretir (adet [questionCount]).
   List<Question> generateAll() {
-    return List<Question>.generate(totalQuestions, (_) => _generate());
+    return List<Question>.generate(questionCount, (_) => _generate());
   }
 
   Question _generate() {
