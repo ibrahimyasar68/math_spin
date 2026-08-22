@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/avatar_store.dart';
-import '../services/progress_store.dart';
 import 'mascot.dart';
 
 /// Avatarı değiştirmek için yatay seçim satırı.
@@ -31,28 +30,21 @@ class AvatarPicker extends StatelessWidget {
         ],
         ValueListenableBuilder<int>(
           valueListenable: store.selectedIndex,
-          builder: (context, selected, _) {
-            // Ödül avatarı oyun bitirilene kadar kilitli görünür.
-            return ValueListenableBuilder<bool>(
-              valueListenable: ProgressStore.instance.completed,
-              // Wrap: avatar sayısı arttıkça (ör. ödül avatarı) dar ekranda
-              // taşmak yerine alt satıra iner; dokunma hedefleri küçülmez.
-              builder: (context, completed, _) => Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (var i = 0; i < mascotSkins.length; i++)
-                    _AvatarChip(
-                      skin: mascotSkins[i],
-                      selected: i == selected,
-                      locked: i == championSkinIndex && !completed,
-                      onTap: () => store.select(i),
-                    ),
-                ],
-              ),
-            );
-          },
+          // Wrap: avatar sayısı arttığında dar ekranda taşmak yerine alt
+          // satıra iner; dokunma hedefleri küçülmez.
+          builder: (context, selected, _) => Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (var i = 0; i < mascotSkins.length; i++)
+                _AvatarChip(
+                  skin: mascotSkins[i],
+                  selected: i == selected,
+                  onTap: () => store.select(i),
+                ),
+            ],
+          ),
         ),
       ],
     );
@@ -62,22 +54,18 @@ class AvatarPicker extends StatelessWidget {
 class _AvatarChip extends StatelessWidget {
   final MascotSkin skin;
   final bool selected;
-
-  /// Kilitli avatar seçilemez; üstünde kilit simgesi gösterilir.
-  final bool locked;
   final VoidCallback onTap;
 
   const _AvatarChip({
     required this.skin,
     required this.selected,
     required this.onTap,
-    this.locked = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: locked ? null : onTap,
+      onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         width: 54,
@@ -99,19 +87,9 @@ class _AvatarChip extends StatelessWidget {
               : null,
         ),
         child: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Opacity(
-                opacity: locked ? 0.35 : 1,
-                child: CustomPaint(
-                  size: const Size(34, 34),
-                  painter: _MiniMascotPainter(skin: skin),
-                ),
-              ),
-              if (locked)
-                const Icon(Icons.lock_rounded, size: 20, color: Colors.white),
-            ],
+          child: CustomPaint(
+            size: const Size(34, 34),
+            painter: _MiniMascotPainter(skin: skin),
           ),
         ),
       ),

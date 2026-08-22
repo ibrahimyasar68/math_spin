@@ -38,7 +38,6 @@ void main() {
       of: find.byType(AvatarPicker),
       matching: find.byType(GestureDetector),
     );
-    // 5 normal avatar + 1 kilitli ödül avatarı.
     expect(chips, findsNWidgets(mascotSkins.length));
     await tester.tap(chips.at(2));
     await tester.pump();

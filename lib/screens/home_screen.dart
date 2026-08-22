@@ -129,13 +129,28 @@ class _HomeScreenState extends State<HomeScreen>
                               angle: (1 - mv) * -0.9,
                               child: Transform.scale(
                                 scale: (0.05 + mv * 0.95).clamp(0.05, 1.15),
+                                // Avatarın iki yanında kazanılan yıldızlar.
                                 child: ValueListenableBuilder<int>(
-                                  valueListenable:
-                                      AvatarStore.instance.selectedIndex,
-                                  builder: (context, idx, __) => Mascot(
-                                    mood: MascotMood.happy,
-                                    skin: mascotSkins[idx],
-                                    size: 140,
+                                  valueListenable: ProgressStore.instance.stars,
+                                  builder: (context, stars, __) => FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _StarColumnPair.left(stars),
+                                        ValueListenableBuilder<int>(
+                                          valueListenable: AvatarStore
+                                              .instance.selectedIndex,
+                                          builder: (context, idx, ___) =>
+                                              Mascot(
+                                            mood: MascotMood.happy,
+                                            skin: mascotSkins[idx],
+                                            size: 140,
+                                          ),
+                                        ),
+                                        _StarColumnPair.right(stars),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -192,19 +207,6 @@ class _HomeScreenState extends State<HomeScreen>
                             _CategoryBadge(category: cat),
                       ),
                     ),
-                    // Oyunu bitirenlere kalıcı şampiyon rozeti.
-                    ValueListenableBuilder<bool>(
-                      valueListenable: ProgressStore.instance.completed,
-                      builder: (context, done, _) => !done
-                          ? const SizedBox.shrink()
-                          : Opacity(
-                              opacity: sv,
-                              child: const Padding(
-                                padding: EdgeInsets.only(top: 8),
-                                child: _ChampionBadge(),
-                              ),
-                            ),
-                    ),
                     const Spacer(),
                     Opacity(
                       opacity: bo,
@@ -249,36 +251,42 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-/// Oyunu bitirmiş oyuncuya gösterilen kalıcı şampiyon rozeti.
-class _ChampionBadge extends StatelessWidget {
-  const _ChampionBadge();
+/// Avatarın bir yanındaki yıldız sütunu.
+///
+/// Yıldızlar dengeli dağıtılır: 1. yıldız sağa, 2. sola, 3. sağa... Böylece
+/// diziliş her zaman simetriğe yakın durur ve [ProgressStore.maxStars] (10)
+/// tamamlandığında tam olarak 5 sağda, 5 solda olur.
+class _StarColumnPair extends StatelessWidget {
+  final int count;
+
+  const _StarColumnPair._(this.count);
+
+  factory _StarColumnPair.right(int stars) =>
+      _StarColumnPair._((stars + 1) ~/ 2);
+
+  factory _StarColumnPair.left(int stars) => _StarColumnPair._(stars ~/ 2);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.22),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.accent, width: 2),
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('👑', style: TextStyle(fontSize: 18)),
-            const SizedBox(width: 6),
-            Text(
-              'Şampiyon',
-              style: GoogleFonts.baloo2(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+    if (count <= 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < count; i++)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 1),
+              child: Icon(
+                Icons.star_rounded,
+                color: AppColors.sunny,
+                size: 26,
+                shadows: [
+                  Shadow(color: Colors.black45, blurRadius: 4),
+                ],
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

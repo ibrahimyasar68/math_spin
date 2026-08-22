@@ -4,7 +4,6 @@ import 'package:mathspin/models/question.dart';
 import 'package:mathspin/screens/result_screen.dart';
 import 'package:mathspin/screens/victory_screen.dart';
 import 'package:mathspin/services/progress_store.dart';
-import 'package:mathspin/widgets/mascot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -19,7 +18,7 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    ProgressStore.instance.completed.value = false;
+    ProgressStore.instance.stars.value = 0;
   });
 
   testWidgets('Son kategori geçilince OYUNU BİTİR pasta üzerinden zafere '
@@ -37,7 +36,6 @@ void main() {
     );
     await tester.pump();
 
-    // Son kategoride buton "OYUNU BİTİR" olmalı.
     expect(find.text('OYUNU BİTİR'), findsOneWidget);
     expect(find.text('SONRAKİ KATEGORİ'), findsNothing);
 
@@ -45,46 +43,67 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    // Önce final pastası gelir.
     expect(find.text('Mumları üfle! 🎂'), findsOneWidget);
     expect(find.text('0 / 10'), findsOneWidget,
         reason: 'Final pastasında 10 mum olmalı');
   });
 
-  testWidgets('Zafer ekranı şampiyonluğu kalıcı kılar ve ödülü açar',
-      (tester) async {
+  testWidgets('Her bitiriş bir yıldız kazandırır', (tester) async {
     await tester.binding.setSurfaceSize(const Size(420, 950));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    expect(ProgressStore.instance.completed.value, isFalse);
+    expect(ProgressStore.instance.stars.value, 0);
 
     await tester.pumpWidget(const MaterialApp(home: VictoryScreen()));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
 
     expect(find.text('ŞAMPİYON!'), findsOneWidget);
+    expect(ProgressStore.instance.stars.value, 1,
+        reason: 'Bitiriş bir yıldız kazandırmalı');
+    expect(find.text('1 / 10 yıldız'), findsOneWidget);
+
+    // Yıldız tamamlanmadığı sürece baştan başlanabilir.
     expect(find.text('BAŞTAN BAŞLA'), findsOneWidget);
     expect(find.text('SON KATEGORİYİ OYNA'), findsOneWidget);
-
-    // Bitirme kalıcı olarak işaretlenir -> ödül avatarının kilidi açılır.
-    expect(ProgressStore.instance.completed.value, isTrue);
-    expect(find.text('🔓 Yeni avatar açıldı!'), findsOneWidget);
   });
 
-  test('Baştan başlamak şampiyonluğu geri almaz', () {
+  testWidgets('10. yıldızda oyun tamamen biter; baştan başlama sunulmaz',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(420, 950));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    // 9 yıldız kazanılmış; bu bitiriş 10.'yu getirir.
+    ProgressStore.instance.stars.value = ProgressStore.maxStars - 1;
+
+    await tester.pumpWidget(const MaterialApp(home: VictoryScreen()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(ProgressStore.instance.stars.value, ProgressStore.maxStars);
+    expect(ProgressStore.instance.isFullyComplete, isTrue);
+    expect(find.text('OYUN BİTTİ!'), findsOneWidget);
+    expect(find.text('ŞAMPİYON!'), findsNothing);
+    expect(find.text('BAŞTAN BAŞLA'), findsNothing,
+        reason: 'Oyun tamamen bitince baştan başlama sunulmaz');
+  });
+
+  test('Yıldız sayısı üst sınırı aşmaz', () {
+    ProgressStore.instance.stars.value = ProgressStore.maxStars;
+    ProgressStore.instance.awardStar();
+    expect(ProgressStore.instance.stars.value, ProgressStore.maxStars);
+  });
+
+  test('Baştan başlamak yıldızları geri almaz', () {
     ProgressStore.instance.setCategory(ProgressStore.maxCategory);
-    ProgressStore.instance.markCompleted();
+    ProgressStore.instance.awardStar();
+    ProgressStore.instance.awardStar();
 
     ProgressStore.instance.restart();
 
     expect(ProgressStore.instance.category.value, 1,
         reason: 'İlerleme başa dönmeli');
-    expect(ProgressStore.instance.completed.value, isTrue,
-        reason: 'Kazanılan şampiyonluk ve ödül avatarı korunmalı');
-  });
-
-  test('Ödül avatarı listenin sonundadır', () {
-    expect(championSkinIndex, mascotSkins.length - 1);
-    expect(mascotSkins[championSkinIndex].name, 'Şampiyon');
+    expect(ProgressStore.instance.stars.value, 2,
+        reason: 'Kazanılan yıldızlar korunmalı');
   });
 }

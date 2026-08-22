@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/audio_service.dart';
+import '../services/avatar_store.dart';
 import '../services/progress_store.dart';
 import '../services/question_generator.dart';
 import '../theme/app_colors.dart';
@@ -15,9 +16,9 @@ import 'home_screen.dart';
 
 /// Oyunun bitirildiği (son kategori geçildiği) final ekranı.
 ///
-/// Şampiyonluk başlığı sırayla belirir, yolculuk özeti ve ödül avatarının
-/// kilidinin açıldığı kart gösterilir. Oyuncu buradan baştan başlayabilir ya da
-/// son kategoride kalmaya devam edebilir.
+/// Her bitiriş bir yıldız kazandırır; yıldızlar ana ekranda avatarın iki
+/// yanında gösterilir. [ProgressStore.maxStars] tamamlandığında oyun tamamen
+/// biter ve baştan başlama sunulmaz.
 class VictoryScreen extends StatefulWidget {
   const VictoryScreen({super.key});
 
@@ -30,18 +31,19 @@ class _VictoryScreenState extends State<VictoryScreen>
   late final AnimationController _intro;
   late final ConfettiController _confetti;
 
-  /// Oyuncu bu ekrana gelmeden önce ödülü zaten kazanmış mıydı?
-  ///
-  /// İlk bitirişte "kilidi açıldı" vurgusu yapılır; tekrar bitirişlerde ödül
-  /// yalnızca hatırlatılır.
-  late final bool _firstTime;
+  /// Bu bitirişle ulaşılan yıldız sayısı.
+  late final int _stars;
+
+  /// Tüm yıldızlar toplandı mı? Toplandıysa oyun tamamen biter: baştan başlama
+  /// sunulmaz.
+  bool get _fullyComplete => _stars >= ProgressStore.maxStars;
 
   @override
   void initState() {
     super.initState();
-    _firstTime = !ProgressStore.instance.completed.value;
-    // Rozet ve ödül avatarı kalıcı olarak açılır.
-    ProgressStore.instance.markCompleted();
+    // Bu bitiriş bir yıldız kazandırır; yıldızlar kalıcıdır.
+    ProgressStore.instance.awardStar();
+    _stars = ProgressStore.instance.stars.value;
 
     _confetti = ConfettiController(duration: const Duration(seconds: 4));
     _intro = AnimationController(
@@ -86,8 +88,7 @@ class _VictoryScreenState extends State<VictoryScreen>
           ),
         ),
         content: Text(
-          'İlerlemen Kategori 1\'e döner. Şampiyon rozetin ve ödül avatarın '
-          'sende kalır.',
+          'İlerlemen Kategori 1\'e döner. Kazandığın yıldızlar sende kalır.',
           style: GoogleFonts.nunito(fontSize: 17, color: Colors.white70),
         ),
         actions: [
@@ -154,7 +155,7 @@ class _VictoryScreenState extends State<VictoryScreen>
                     child: Column(
                       children: [
                         const Spacer(),
-                        // Taçlı şampiyon maskotu.
+                        // Taçlı maskot (oyuncunun seçtiği avatar).
                         Opacity(
                           opacity: mascotIn.clamp(0.0, 1.0),
                           child: Transform.scale(
@@ -167,7 +168,7 @@ class _VictoryScreenState extends State<VictoryScreen>
                         Opacity(
                           opacity: titleIn,
                           child: Text(
-                            'ŞAMPİYON!',
+                            _fullyComplete ? 'OYUN BİTTİ!' : 'ŞAMPİYON!',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.baloo2(
                               fontSize: 46,
@@ -188,7 +189,10 @@ class _VictoryScreenState extends State<VictoryScreen>
                         Opacity(
                           opacity: titleIn,
                           child: Text(
-                            'Tüm kategorileri bitirdin!',
+                            _fullyComplete
+                                ? 'Tüm yıldızları topladın!\nOyunu tamamen '
+                                    'bitirdin.'
+                                : 'Tüm kategorileri bitirdin!',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.nunito(
                               fontSize: 20,
@@ -197,7 +201,16 @@ class _VictoryScreenState extends State<VictoryScreen>
                             ),
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
+                        // Kazanılan yıldızlar.
+                        Opacity(
+                          opacity: rewardIn.clamp(0.0, 1.0),
+                          child: Transform.scale(
+                            scale: (0.7 + rewardIn * 0.3).clamp(0.7, 1.05),
+                            child: _StarBoard(stars: _stars),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         // Yolculuk özeti.
                         Opacity(
                           opacity: statsIn,
@@ -206,35 +219,31 @@ class _VictoryScreenState extends State<VictoryScreen>
                             child: const _JourneySummary(),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        // Ödül avatarı.
-                        Opacity(
-                          opacity: rewardIn.clamp(0.0, 1.0),
-                          child: Transform.scale(
-                            scale: (0.7 + rewardIn * 0.3).clamp(0.7, 1.05),
-                            child: _RewardCard(firstTime: _firstTime),
-                          ),
-                        ),
                         const Spacer(),
                         Opacity(
                           opacity: buttonsIn,
                           child: Column(
                             children: [
-                              CandyButton(
-                                label: 'BAŞTAN BAŞLA',
-                                icon: Icons.restart_alt_rounded,
-                                color: AppColors.success,
-                                height: 64,
-                                fontSize: 24,
-                                onPressed: _confirmRestart,
-                              ),
-                              const SizedBox(height: 10),
+                              // Oyun tamamen bittiyse baştan başlama sunulmaz.
+                              if (!_fullyComplete) ...[
+                                CandyButton(
+                                  label: 'BAŞTAN BAŞLA',
+                                  icon: Icons.restart_alt_rounded,
+                                  color: AppColors.success,
+                                  height: 64,
+                                  fontSize: 24,
+                                  onPressed: _confirmRestart,
+                                ),
+                                const SizedBox(height: 10),
+                              ],
                               CandyButton(
                                 label: 'SON KATEGORİYİ OYNA',
                                 icon: Icons.replay_rounded,
-                                color: AppColors.sky,
-                                height: 58,
-                                fontSize: 21,
+                                color: _fullyComplete
+                                    ? AppColors.success
+                                    : AppColors.sky,
+                                height: _fullyComplete ? 64 : 58,
+                                fontSize: _fullyComplete ? 24 : 21,
                                 onPressed: _replayFinal,
                               ),
                             ],
@@ -269,10 +278,13 @@ class _CrownedMascot extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 18),
-            child: Mascot(
-              mood: MascotMood.happy,
-              skin: mascotSkins[championSkinIndex],
-              size: 130,
+            child: ValueListenableBuilder<int>(
+              valueListenable: AvatarStore.instance.selectedIndex,
+              builder: (context, idx, _) => Mascot(
+                mood: MascotMood.happy,
+                skin: mascotSkins[idx],
+                size: 130,
+              ),
             ),
           ),
           const Positioned(
@@ -342,58 +354,51 @@ class _JourneySummary extends StatelessWidget {
   }
 }
 
-/// Kilidi açılan ödül avatarını tanıtan kart.
-class _RewardCard extends StatelessWidget {
-  final bool firstTime;
+/// Kazanılan yıldızları gösteren tablo.
+///
+/// Ana ekrandaki dizilimle aynı mantık: yıldızlar avatarın iki yanına dengeli
+/// dağılır, [ProgressStore.maxStars] tamamlanınca 5 sağda 5 solda olur. Burada
+/// ise tek sırada, kazanılmayanlar soluk gösterilir.
+class _StarBoard extends StatelessWidget {
+  final int stars;
 
-  const _RewardCard({required this.firstTime});
+  const _StarBoard({required this.stars});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.16),
+        color: AppColors.accent.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.accent, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withValues(alpha: 0.35),
-            blurRadius: 18,
-          ),
-        ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Mascot(
-            mood: MascotMood.happy,
-            skin: mascotSkins[championSkinIndex],
-            size: 56,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  firstTime ? '🔓 Yeni avatar açıldı!' : '🏆 Ödül avatarın',
-                  style: GoogleFonts.baloo2(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                for (var i = 0; i < ProgressStore.maxStars; i++)
+                  Icon(
+                    i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
+                    color: i < stars
+                        ? AppColors.sunny
+                        : Colors.white.withValues(alpha: 0.35),
+                    size: 28,
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Şampiyon avatarını ayarlardan seçebilirsin.',
-                  style: GoogleFonts.nunito(
-                    fontSize: 14,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '$stars / ${ProgressStore.maxStars} yıldız',
+            style: GoogleFonts.baloo2(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
         ],
