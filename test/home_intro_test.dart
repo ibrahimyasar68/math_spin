@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mathspin/screens/home_screen.dart';
 import 'package:mathspin/services/avatar_store.dart';
 import 'package:mathspin/widgets/avatar_picker.dart';
+import 'package:mathspin/widgets/mascot.dart';
 
 void main() {
   setUp(() => AvatarStore.instance.selectedIndex.value = 0);
@@ -37,7 +38,8 @@ void main() {
       of: find.byType(AvatarPicker),
       matching: find.byType(GestureDetector),
     );
-    expect(chips, findsNWidgets(5));
+    // 5 normal avatar + 1 kilitli ödül avatarı.
+    expect(chips, findsNWidgets(mascotSkins.length));
     await tester.tap(chips.at(2));
     await tester.pump();
 

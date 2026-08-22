@@ -64,7 +64,21 @@ const List<MascotSkin> mascotSkins = [
     ear: AppColors.grape,
     antenna: AppColors.coral,
   ),
+  // Ödül avatarı: oyun bitirilene kadar kilitli (bkz. [championSkinIndex]).
+  MascotSkin(
+    name: 'Şampiyon',
+    headTop: Color(0xFFFFE27A),
+    headBottom: Color(0xFFC98A10),
+    ear: Color(0xFFFFF3C4),
+    antenna: AppColors.coral,
+  ),
 ];
+
+/// Ödül avatarının [mascotSkins] içindeki indeksi.
+///
+/// Oyun bitirilene kadar seçiciye kilitli görünür; kilidi
+/// `ProgressStore.completed` açar.
+const int championSkinIndex = 5;
 
 /// Oyuna kişilik katan, ifade değiştiren ve hafifçe sallanan robot maskot.
 class Mascot extends StatefulWidget {

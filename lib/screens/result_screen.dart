@@ -12,6 +12,7 @@ import '../widgets/mascot.dart';
 import '../widgets/starry_background.dart';
 import 'cake_celebration_screen.dart';
 import 'game_screen.dart';
+import 'victory_screen.dart';
 
 /// Kategori sonu özet ekranı.
 ///
@@ -105,14 +106,33 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
+  /// Final pastasındaki mum sayısı.
+  ///
+  /// Her kategori için bir mum koymak (40) üflemesi uzun sürdüğü ve küçük
+  /// ekranda sıkıştığı için sabit tutuldu.
+  static const int _finalCandles = 10;
+
   /// Buton her zaman güncel (kayıtlı) kategoriden yeni oyun başlatır:
   /// geçildiyse üst kategori, geçilemediyse aynı kategori.
   ///
   /// Bir üst kategoriye geçişte önce yaş pasta kutlaması gösterilir: oyuncu
   /// o ana kadar geçtiği kategori sayısı kadar mumu üfleyip söndürünce oyuna
   /// devam edilir.
+  ///
+  /// Son kategori geçildiyse oyun biter: büyük pastanın ardından şampiyonluk
+  /// ekranı gelir.
   void _playAgain() {
-    if (_passed && !_isFinalCategory) {
+    if (_passed && _isFinalCategory) {
+      // Oyun bitti: doruk noktası olarak büyük pasta, sonra final ekranı.
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const CakeCelebrationScreen(
+            candleCount: _finalCandles,
+            nextBuilder: _buildVictory,
+          ),
+        ),
+      );
+    } else if (_passed) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => CakeCelebrationScreen(
@@ -127,6 +147,8 @@ class _ResultScreenState extends State<ResultScreen> {
       );
     }
   }
+
+  static Widget _buildVictory(BuildContext context) => const VictoryScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +202,9 @@ class _ResultScreenState extends State<ResultScreen> {
                     const SizedBox(height: 12),
                     CandyButton(
                       label: _passed
-                          ? (_isFinalCategory ? 'TEKRAR OYNA' : 'SONRAKİ KATEGORİ')
+                          ? (_isFinalCategory
+                              ? 'OYUNU BİTİR'
+                              : 'SONRAKİ KATEGORİ')
                           : 'TEKRAR DENE',
                       icon: _passed
                           ? Icons.arrow_forward_rounded

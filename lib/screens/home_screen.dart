@@ -192,6 +192,19 @@ class _HomeScreenState extends State<HomeScreen>
                             _CategoryBadge(category: cat),
                       ),
                     ),
+                    // Oyunu bitirenlere kalıcı şampiyon rozeti.
+                    ValueListenableBuilder<bool>(
+                      valueListenable: ProgressStore.instance.completed,
+                      builder: (context, done, _) => !done
+                          ? const SizedBox.shrink()
+                          : Opacity(
+                              opacity: sv,
+                              child: const Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: _ChampionBadge(),
+                              ),
+                            ),
+                    ),
                     const Spacer(),
                     Opacity(
                       opacity: bo,
@@ -232,6 +245,41 @@ class _HomeScreenState extends State<HomeScreen>
   void _openSettings() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const SettingsScreen()),
+    );
+  }
+}
+
+/// Oyunu bitirmiş oyuncuya gösterilen kalıcı şampiyon rozeti.
+class _ChampionBadge extends StatelessWidget {
+  const _ChampionBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.accent.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.accent, width: 2),
+      ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('👑', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 6),
+            Text(
+              'Şampiyon',
+              style: GoogleFonts.baloo2(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
