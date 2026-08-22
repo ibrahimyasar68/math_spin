@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen>
                       child: Text(
                         'MathSpin',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.baloo2(
                           fontSize: 56,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -289,7 +289,7 @@ class _CategoryBadge extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Kategori $category',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,

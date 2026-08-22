@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
                       child: Text(
                         onboarding ? 'Hoş geldin!' : 'Ayarlar',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.baloo2(
                           fontSize: 30,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -216,7 +216,7 @@ class _SettingsCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: GoogleFonts.fredoka(
+                style: GoogleFonts.baloo2(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,

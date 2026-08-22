@@ -274,7 +274,7 @@ class _ReelCell extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               softWrap: false,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 48,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,

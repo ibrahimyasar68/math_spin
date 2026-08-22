@@ -369,7 +369,7 @@ class _GameScreenState extends State<GameScreen> {
         Text(
           'Soru ${_index + 1} / ${_questions.length}',
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.fredoka(
+          style: GoogleFonts.baloo2(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -407,7 +407,7 @@ class _GameScreenState extends State<GameScreen> {
 
     final equals = Text(
       '=',
-      style: GoogleFonts.fredoka(
+      style: GoogleFonts.baloo2(
         fontSize: 44,
         fontWeight: FontWeight.w700,
         color: Colors.white,
@@ -511,7 +511,7 @@ class _GameScreenState extends State<GameScreen> {
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
             'Çevriliyor...',
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.baloo2(
               fontSize: 24,
               color: Colors.white70,
             ),
@@ -567,7 +567,7 @@ class _CategoryChip extends StatelessWidget {
             child: Text(
               'Kategori $category',
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -604,7 +604,7 @@ class _LiveScore extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               '$value',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -785,7 +785,7 @@ class _ResultCell extends StatelessWidget {
               text,
               maxLines: 1,
               softWrap: false,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 48,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -834,7 +834,7 @@ class _RevealCard extends StatelessWidget {
               question.solvedPrompt,
               maxLines: 1,
               softWrap: false,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 32,
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
@@ -885,7 +885,7 @@ class _AnswerPad extends StatelessWidget {
           ),
           child: Text(
             input.isEmpty ? 'Cevabın' : input,
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.baloo2(
               fontSize: input.isEmpty ? 26 : 40,
               fontWeight: FontWeight.w700,
               color: input.isEmpty

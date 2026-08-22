@@ -20,7 +20,7 @@ class AvatarPicker extends StatelessWidget {
         if (showTitle) ...[
           Text(
             'Avatarını seç',
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.baloo2(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Colors.white70,

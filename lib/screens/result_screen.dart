@@ -161,7 +161,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     Text(
                       fb.message,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.fredoka(
+                      style: GoogleFonts.baloo2(
                         fontSize: 34,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -237,7 +237,7 @@ class _ScoreBanner extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               'Kategori $category',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -246,7 +246,7 @@ class _ScoreBanner extends StatelessWidget {
             const SizedBox(width: 28),
             Text(
               '$score PUAN',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
                 color: color,
@@ -328,7 +328,7 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               value,
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.baloo2(
                 fontSize: 30,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -377,7 +377,7 @@ class _SummaryList extends StatelessWidget {
                 backgroundColor: color,
                 child: Text(
                   '${i + 1}',
-                  style: GoogleFonts.fredoka(
+                  style: GoogleFonts.baloo2(
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                     fontSize: 16,
@@ -397,7 +397,7 @@ class _SummaryList extends StatelessWidget {
                         r.question.solvedPrompt,
                         maxLines: 1,
                         softWrap: false,
-                        style: GoogleFonts.fredoka(
+                        style: GoogleFonts.baloo2(
                           fontSize: 22,
                           color: Colors.white,
                           fontWeight: FontWeight.w600,

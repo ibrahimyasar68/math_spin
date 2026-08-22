@@ -169,7 +169,7 @@ class _CakeCelebrationScreenState extends State<CakeCelebrationScreen>
                   Text(
                     _done ? 'Tebrikler! 🎉' : 'Mumları üfle! 🎂',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.baloo2(
                       fontSize: 34,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -190,7 +190,7 @@ class _CakeCelebrationScreenState extends State<CakeCelebrationScreen>
                   const SizedBox(height: 4),
                   Text(
                     '$_blown / $_count',
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.baloo2(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: AppColors.sunny,

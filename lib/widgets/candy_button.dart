@@ -71,7 +71,7 @@ class _CandyButtonState extends State<CandyButton> {
           child: Text(
             widget.label,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.fredoka(
+            style: GoogleFonts.baloo2(
               fontSize: widget.fontSize,
               fontWeight: FontWeight.w700,
               color: _enabled ? widget.foreground : Colors.white60,
