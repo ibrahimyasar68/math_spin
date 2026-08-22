@@ -93,6 +93,8 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
+    // Ekrandan çıkılırken çark sesi arkada çalmaya devam etmesin.
+    AudioService.instance.stopSpin();
     _reelA.dispose();
     _reelOp.dispose();
     _reelB.dispose();
@@ -105,6 +107,7 @@ class _GameScreenState extends State<GameScreen> {
 
   void _spin() {
     if (_phase != GamePhase.ready || _resolving) return;
+    AudioService.instance.playSpin();
     setState(() {
       _phase = GamePhase.spinning;
       _input = '';

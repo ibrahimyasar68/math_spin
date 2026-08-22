@@ -26,6 +26,7 @@ flutter:
   assets:
     - assets/sounds/clap.m4a
     - assets/sounds/wrong.m4a
+    - assets/sounds/spin.m4a
     # Yazı tipleri uygulamaya gömülü: google_fonts bu klasördeki dosyaları
     # bulup kullanır, çalışma anında internetten indirmez. Dosya adları
     # Google Fonts API biçimindedir; DEĞİŞTİRME (eşleşme ada göre yapılır).
