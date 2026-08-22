@@ -31,6 +31,13 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   static const Duration _spinBase = Duration(milliseconds: 1500);
 
+  /// Cevap alanı içindeki kısa içeriğin (ÇEVİR butonu, doğru cevap kartı)
+  /// hizası. Alan sabit yükseklikte olduğu için klavyeden kısa fazlarda boşluk
+  /// kalır; içerik bu boşluğun 1/5'i kadar yukarı alınır (alta yapışık değil,
+  /// ortada da değil). Align'da y ekseni boş alanı -1..+1 tarar: alttan 1/5 =
+  /// y 0.6.
+  static const Alignment _answerAlignment = Alignment(0, 0.6);
+
   // Oynanan kategori: oyun boyunca sabittir, sorular buna göre üretilir.
   late final int _category;
 
@@ -313,7 +320,7 @@ class _GameScreenState extends State<GameScreen> {
                                     width: maxW,
                                     height: _AnswerPad.totalHeight,
                                     child: Align(
-                                      alignment: Alignment.bottomCenter,
+                                      alignment: _answerAlignment,
                                       child: _buildAnswerArea(),
                                     ),
                                   ),
