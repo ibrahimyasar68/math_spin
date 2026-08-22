@@ -272,13 +272,30 @@ class _GameScreenState extends State<GameScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Maskot + iki yanında kazanılan yıldızlar:
+                                // oyuncu oynarken de kaç yıldızı olduğunu
+                                // görür.
                                 ValueListenableBuilder<int>(
-                                  valueListenable:
-                                      AvatarStore.instance.selectedIndex,
-                                  builder: (context, idx, _) => Mascot(
-                                    mood: _mood,
-                                    skin: mascotSkins[idx],
-                                    size: 88,
+                                  valueListenable: ProgressStore.instance.stars,
+                                  builder: (context, stars, _) => Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _StarCluster(
+                                        count: _StarCluster.leftCount(stars),
+                                      ),
+                                      ValueListenableBuilder<int>(
+                                        valueListenable:
+                                            AvatarStore.instance.selectedIndex,
+                                        builder: (context, idx, __) => Mascot(
+                                          mood: _mood,
+                                          skin: mascotSkins[idx],
+                                          size: 88,
+                                        ),
+                                      ),
+                                      _StarCluster(
+                                        count: _StarCluster.rightCount(stars),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -639,6 +656,61 @@ class _LiveScore extends StatelessWidget {
         const SizedBox(width: 8),
         chip(Icons.cancel_rounded, wrong, AppColors.danger),
       ],
+    );
+  }
+}
+
+/// Oyun ekranında maskotun bir yanındaki yıldız kümesi.
+///
+/// Yıldızlar 2 + 3 olacak şekilde iki sıraya dizilir; böylece dar oyun
+/// ekranında beş yıldız alt alta uzamak yerine derli toplu durur. Doldurma
+/// sırası önce sol taraf, sonra sağ taraftır ([leftCount] / [rightCount]).
+class _StarCluster extends StatelessWidget {
+  /// Bu yandaki yıldız adedi (0..[_perSide]).
+  final int count;
+
+  /// Bir yana sığan yıldız adedi (üst sıra 2 + alt sıra 3).
+  static const int _perSide = 5;
+  static const int _topRow = 2;
+
+  const _StarCluster({required this.count});
+
+  /// Önce sol taraf dolar.
+  static int leftCount(int stars) => stars.clamp(0, _perSide);
+
+  /// Sol taraf dolduktan sonra kalanlar sağa geçer.
+  static int rightCount(int stars) =>
+      (stars - _perSide).clamp(0, _perSide);
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return const SizedBox.shrink();
+
+    Widget row(int n) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < n; i++)
+              const Icon(
+                Icons.star_rounded,
+                color: AppColors.sunny,
+                size: 17,
+                shadows: [Shadow(color: Colors.black45, blurRadius: 3)],
+              ),
+          ],
+        );
+
+    final top = count.clamp(0, _topRow);
+    final bottom = (count - _topRow).clamp(0, _perSide - _topRow);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          row(top),
+          if (bottom > 0) row(bottom),
+        ],
+      ),
     );
   }
 }
