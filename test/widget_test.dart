@@ -20,9 +20,9 @@ void main() {
 
     expect(find.text('MathSpin'), findsOneWidget);
     expect(find.text('BAŞLA'), findsOneWidget);
-    // Sadece bulunulan kategori gösterilir; toplam ("/ 60") yazılmaz.
+    // Sadece bulunulan kategori gösterilir; toplam ("/ 40") yazılmaz.
     expect(find.text('Kategori 1'), findsOneWidget);
-    expect(find.textContaining('/ 60'), findsNothing);
+    expect(find.textContaining('/ 40'), findsNothing);
   });
 
   test('Bant başı kategoride 10 soru; yalnız toplama/çıkarma', () {
@@ -43,13 +43,13 @@ void main() {
   test('Soru adedi bant içindeki sıraya göre azalır (10..10,9,8,7,6,5)', () {
     // Banttaki sıra -> beklenen soru adedi.
     const expected = [
-      10, 10, 10, 10, 10, 10, 10, 10, 10, 10, // sıra 1–10
-      9, 8, 7, 6, 5, // sıra 11–15
+      10, 10, 10, 10, 10, // sıra 1–5
+      9, 8, 7, 6, 5, // sıra 6–10
     ];
 
     for (var band = 0; band < 4; band++) {
-      for (var pos = 1; pos <= 15; pos++) {
-        final cat = band * 15 + pos;
+      for (var pos = 1; pos <= 10; pos++) {
+        final cat = band * 10 + pos;
         final want = expected[pos - 1];
         expect(QuestionGenerator.questionCountFor(cat), want,
             reason: 'kategori $cat (bant ${band + 1}, sıra $pos)');
@@ -59,20 +59,20 @@ void main() {
     }
 
     // Uç noktalar: çizelgedeki kritik kategoriler.
-    expect(QuestionGenerator.questionCountFor(10), 10);
-    expect(QuestionGenerator.questionCountFor(15), 5);
-    expect(QuestionGenerator.questionCountFor(16), 10);
-    expect(QuestionGenerator.questionCountFor(45), 5);
-    expect(QuestionGenerator.questionCountFor(46), 10);
-    expect(QuestionGenerator.questionCountFor(60), 5);
+    expect(QuestionGenerator.questionCountFor(5), 10);
+    expect(QuestionGenerator.questionCountFor(10), 5);
+    expect(QuestionGenerator.questionCountFor(11), 10);
+    expect(QuestionGenerator.questionCountFor(30), 5);
+    expect(QuestionGenerator.questionCountFor(31), 10);
+    expect(QuestionGenerator.questionCountFor(40), 5);
   });
 
-  test('Alt bantlarda (1–30) sayılar tam olarak bandın basamağındadır', () {
+  test('Alt bantlarda (1–20) sayılar tam olarak bandın basamağındadır', () {
     int digits(int n) => n.toString().length;
     // kategori -> beklenen basamak sayısı (karışım yok: mixRatio = 0)
     const bands = {
-      1: 1, 8: 1, 15: 1, // tek basamaklı
-      16: 2, 23: 2, 30: 2, // iki basamaklı
+      1: 1, 5: 1, 10: 1, // tek basamaklı
+      11: 2, 16: 2, 20: 2, // iki basamaklı
     };
 
     bands.forEach((cat, d) {
@@ -98,8 +98,8 @@ void main() {
     int digits(int n) => n.toString().length;
     // kategori -> (bandın basamağı, beklenen karışım oranı)
     const bands = {
-      31: (3, 0.10), 38: (3, 0.10), 45: (3, 0.10),
-      46: (4, 0.15), 53: (4, 0.15), 60: (4, 0.15),
+      21: (3, 0.10), 25: (3, 0.10), 30: (3, 0.10),
+      31: (4, 0.15), 35: (4, 0.15), 40: (4, 0.15),
     };
 
     bands.forEach((cat, spec) {
@@ -129,7 +129,7 @@ void main() {
   });
 
   test('Bölme soruları her bantta tam sayı sonuç verir', () {
-    for (final cat in [12, 28, 40, 60]) {
+    for (final cat in [8, 18, 27, 40]) {
       final gen = QuestionGenerator(category: cat);
       for (var trial = 0; trial < 100; trial++) {
         for (final q in gen.generateAll().where((q) => q.op == MathOp.div)) {
@@ -155,8 +155,8 @@ void main() {
         reason: 'Kayıtlı avatar geri yüklenmeli');
 
     ProgressStore.instance.setCategory(99);
-    expect(ProgressStore.instance.category.value, 60,
-        reason: '60 son kategoridir, aşılamaz');
+    expect(ProgressStore.instance.category.value, 40,
+        reason: '40 son kategoridir, aşılamaz');
 
     ProgressStore.instance.setCategory(0);
     expect(ProgressStore.instance.category.value, 1);

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'avatar_store.dart';
+import 'question_generator.dart';
 
 /// Oyuncunun kalıcı ilerlemesini (kategori + avatar tercihi) saklar.
 ///
@@ -13,7 +14,9 @@ class ProgressStore {
 
   static final ProgressStore instance = ProgressStore._();
 
-  static const int maxCategory = 60;
+  /// Son kategori. Tek kaynak [QuestionGenerator]'dır; bant düzeni değişince
+  /// buradaki sınır da kendiliğinden uyar.
+  static const int maxCategory = QuestionGenerator.maxCategory;
   static const String _kCategory = 'player.category';
   static const String _kAvatar = 'player.avatarIndex';
 

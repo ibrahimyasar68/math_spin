@@ -4,18 +4,18 @@ import '../models/question.dart';
 
 /// Seçilen kategoriye göre bir soru seti üretir.
 ///
-/// Soru adedi bandın içindeki sıraya göre azalır: ilk 10 kategoride 10 soru,
+/// Soru adedi bandın içindeki sıraya göre azalır: ilk 5 kategoride 10 soru,
 /// sonraki beş kategoride sırasıyla 9, 8, 7, 6 ve 5 soru. Bandın sonuna doğru
 /// sorular zorlaştığı için sayıları da azalır ([questionCountFor]).
 ///
 /// İşlemlerdeki sayıların basamak adedi kategori bandına bağlıdır. Sonucun
 /// basamak adedi ayrıca kısıtlanmaz, işlemin doğal çıktısıdır.
 ///
-///   - Kategori 1–15 : tek basamaklı sayılar   (1–9)
-///   - Kategori 16–30: iki basamaklı sayılar    (10–99)
-///   - Kategori 31–45: üç basamaklı sayılar     (100–999)  — %10 oranında
+///   - Kategori 1–10 : tek basamaklı sayılar   (1–9)
+///   - Kategori 11–20: iki basamaklı sayılar    (10–99)
+///   - Kategori 21–30: üç basamaklı sayılar     (100–999)  — %10 oranında
 ///                     bazı sayılar 1–2 basamaklı da olabilir
-///   - Kategori 46–60: dört basamaklı sayılar   (1000–9999) — %15 oranında
+///   - Kategori 31–40: dört basamaklı sayılar   (1000–9999) — %15 oranında
 ///                     bazı sayılar 1–3 basamaklı da olabilir
 ///
 /// Bant içi çeşitlilik: bandın başında yalnız toplama/çıkarma, ortasında
@@ -24,21 +24,29 @@ import '../models/question.dart';
 /// Çarpma ve bölmede yalnız ilk sayı banda göre büyür; çarpan/bölen çocuk
 /// dostu ve sonuç girilebilir kalması için 2–9 aralığında tutulur.
 class QuestionGenerator {
-  /// Bandın ilk 10 kategorisindeki (ve varsayılan) soru adedi.
+  /// Bandın ilk 5 kategorisindeki (ve varsayılan) soru adedi.
   static const int totalQuestions = 10;
-  static const int maxCategory = 60;
 
-  /// Bir bandın kapsadığı kategori adedi (1–15, 16–30, ...).
-  static const int _bandSize = 15;
+  /// Bir bandın kapsadığı kategori adedi (1–10, 11–20, ...).
+  static const int bandSize = 10;
+
+  /// Bant sayısı: her biri bir basamak adedine karşılık gelir (1, 2, 3, 4).
+  static const int bandCount = 4;
+
+  static const int maxCategory = bandSize * bandCount; // 40
+
+  /// Soru adedinin azalmaya başladığı sıra: bu sıraya kadar tam
+  /// [totalQuestions] soru sorulur.
+  static const int _fullCountPositions = 5;
 
   /// [category] için soru adedi.
   ///
-  /// Banttaki sıra 1–10 ise 10 soru; 11, 12, 13, 14, 15. sıralarda sırasıyla
+  /// Banttaki sıra 1–5 ise 10 soru; 6, 7, 8, 9, 10. sıralarda sırasıyla
   /// 9, 8, 7, 6 ve 5 soru.
   static int questionCountFor(int category) {
-    final pos = (category - 1) % _bandSize + 1; // banttaki sıra: 1..15
-    if (pos <= 10) return totalQuestions;
-    return totalQuestions - (pos - 10); // 11->9, 12->8, 13->7, 14->6, 15->5
+    final pos = (category - 1) % bandSize + 1; // banttaki sıra: 1..10
+    if (pos <= _fullCountPositions) return totalQuestions;
+    return totalQuestions - (pos - _fullCountPositions); // 6->9 ... 10->5
   }
 
   final int category;
@@ -58,23 +66,23 @@ class QuestionGenerator {
   /// ([mixRatio]; 0 = yalnız bandın kendi basamağı).
   ({int digits, int lo, int hi, int first, int last, double mixRatio})
       get _band {
-    if (category <= 15) {
-      return (digits: 1, lo: 1, hi: 9, first: 1, last: 15, mixRatio: 0.0);
+    if (category <= 10) {
+      return (digits: 1, lo: 1, hi: 9, first: 1, last: 10, mixRatio: 0.0);
+    }
+    if (category <= 20) {
+      return (digits: 2, lo: 10, hi: 99, first: 11, last: 20, mixRatio: 0.0);
     }
     if (category <= 30) {
-      return (digits: 2, lo: 10, hi: 99, first: 16, last: 30, mixRatio: 0.0);
-    }
-    if (category <= 45) {
       // %10 oranında 1–2 basamaklı sayılar da karışır.
-      return (digits: 3, lo: 100, hi: 999, first: 31, last: 45, mixRatio: 0.10);
+      return (digits: 3, lo: 100, hi: 999, first: 21, last: 30, mixRatio: 0.10);
     }
-    // 46–60 (60 son kategori): %15 oranında 1–3 basamaklı sayılar da karışır.
+    // 31–40 (40 son kategori): %15 oranında 1–3 basamaklı sayılar da karışır.
     return (
       digits: 4,
       lo: 1000,
       hi: 9999,
-      first: 46,
-      last: 60,
+      first: 31,
+      last: 40,
       mixRatio: 0.15
     );
   }
