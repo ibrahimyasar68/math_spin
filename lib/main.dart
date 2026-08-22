@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +11,19 @@ import 'services/settings_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Yazı tipleri assets/google_fonts/ altında gömülü; çalışma anında
+  // internetten indirmeye çalışma. Uygulamanın zaten INTERNET izni yok, bu
+  // ayar niyeti açık kılar ve eksik bir font olursa sessizce sistem fontuna
+  // düşmek yerine hata günlüğü bırakır.
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  // Gömülü yazı tiplerinin lisansını (SIL OFL 1.1) uygulamaya kaydet.
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(const ['google_fonts'], license);
+  });
+
   // Dikey moda sabitle (çocuk dostu, basit deneyim).
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
