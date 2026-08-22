@@ -295,6 +295,13 @@ class _GameScreenState extends State<GameScreen> {
                               const SizedBox(height: 10),
                               // Cevap alanı: yüksekliği sınırlı; gerekirse oransal
                               // küçülür ama asla ekrandan taşmaz.
+                              //
+                              // Alan HER FAZDA aynı yüksekliği kaplar
+                              // ([_AnswerPad.totalHeight]); o fazın içeriği alta
+                              // hizalanır. Böylece üstteki soru çerçevesi fazlar
+                              // arasında ne kayar ne de boyut değiştirir: ÇEVİR
+                              // ekranındaki çerçeve cevap ekranındakiyle birebir
+                              // aynı yerde ve boyutta durur.
                               ConstrainedBox(
                                 constraints: BoxConstraints(
                                   maxHeight: constraints.maxHeight * 0.74,
@@ -304,7 +311,11 @@ class _GameScreenState extends State<GameScreen> {
                                   alignment: Alignment.bottomCenter,
                                   child: SizedBox(
                                     width: maxW,
-                                    child: _buildAnswerArea(),
+                                    height: _AnswerPad.totalHeight,
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: _buildAnswerArea(),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -815,6 +826,9 @@ class _RevealCard extends StatelessWidget {
         border: Border.all(color: AppColors.accent, width: 2),
       ),
       child: Column(
+        // Cevap alanı sabit yükseklikte olduğu için kart kendi boyuna
+        // çekilmeli; aksi hâlde ayrılan alanın tamamına yayılır.
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text('🙈', style: TextStyle(fontSize: 40)),
           const SizedBox(height: 8),
@@ -863,6 +877,32 @@ class _AnswerPad extends StatelessWidget {
     required this.onSubmit,
   });
 
+  // ---- Düzen ölçüleri ------------------------------------------------------
+  // Cevap alanı oyun ekranında sabit yükseklikte durur; ölçüler tek yerde
+  // tanımlıdır ki [totalHeight] ile gerçek yükseklik ayrışmasın.
+
+  /// Girilen cevabın gösterildiği beyaz kutunun yüksekliği.
+  static const double displayHeight = 60;
+
+  /// Bölümler arası boşluk.
+  static const double gap = 10;
+
+  /// Klavye tuşunun yüzey yüksekliği ve tuşu saran boşluk.
+  static const double keyHeight = 50;
+  static const double keyPadding = 4;
+
+  /// TAMAM butonunun yüzey yüksekliği.
+  static const double submitHeight = 58;
+
+  /// Cevap alanının değişmeyen toplam yüksekliği: cevap kutusu + 4 sıra tuş +
+  /// TAMAM. Girilen cevaptan ve fazdan bağımsızdır.
+  static const double totalHeight = displayHeight +
+      gap +
+      4 * (keyHeight + CandyButton.depth + keyPadding * 2) +
+      gap +
+      submitHeight +
+      CandyButton.depth;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -870,7 +910,7 @@ class _AnswerPad extends StatelessWidget {
         // Cevap görüntüleme kutusu.
         Container(
           width: double.infinity,
-          height: 60,
+          height: displayHeight,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -894,14 +934,14 @@ class _AnswerPad extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: gap),
         _Keypad(onKey: onKey, onBackspace: onBackspace, onClear: onClear),
-        const SizedBox(height: 10),
+        const SizedBox(height: gap),
         CandyButton(
           label: 'TAMAM',
           icon: Icons.check_rounded,
           color: AppColors.success,
-          height: 58,
+          height: submitHeight,
           fontSize: 26,
           onPressed: input.isEmpty ? null : onSubmit,
         ),
@@ -926,11 +966,11 @@ class _Keypad extends StatelessWidget {
     Widget keyButton(String label, {VoidCallback? onTap, Color? color}) {
       return Expanded(
         child: Padding(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(_AnswerPad.keyPadding),
           child: CandyButton(
             label: label,
             color: color ?? AppColors.grape,
-            height: 50,
+            height: _AnswerPad.keyHeight,
             fontSize: 25,
             onPressed: onTap ?? () => onKey(label),
           ),

@@ -17,6 +17,10 @@ class CandyButton extends StatefulWidget {
   final double fontSize;
   final bool expand;
 
+  /// Alt gövdenin (3B derinlik) kalınlığı. Butonun kapladığı toplam yükseklik
+  /// [height] + [depth] olur; düzen hesabı yapan yerler bunu kullanır.
+  static const double depth = 7;
+
   const CandyButton({
     super.key,
     required this.label,
@@ -34,7 +38,6 @@ class CandyButton extends StatefulWidget {
 }
 
 class _CandyButtonState extends State<CandyButton> {
-  static const double _depth = 7;
   bool _pressed = false;
 
   bool get _enabled => widget.onPressed != null;
@@ -55,7 +58,7 @@ class _CandyButtonState extends State<CandyButton> {
     final baseColor = _enabled ? widget.color : const Color(0xFF5A5570);
     final faceColor = _enabled ? widget.color : const Color(0xFF6E6886);
     final sideColor = _darken(baseColor);
-    final offsetY = _pressed ? _depth : 0.0;
+    final offsetY = _pressed ? CandyButton.depth : 0.0;
 
     final content = Row(
       mainAxisSize: MainAxisSize.min,
@@ -88,14 +91,14 @@ class _CandyButtonState extends State<CandyButton> {
       onTap: _enabled ? widget.onPressed : null,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        height: widget.height + _depth,
+        height: widget.height + CandyButton.depth,
         child: Stack(
           children: [
             // Sabit alt gövde (yan yüzey) — 3B derinlik hissi.
             Positioned(
               left: 0,
               right: 0,
-              top: _depth,
+              top: CandyButton.depth,
               bottom: 0,
               child: Container(
                 decoration: BoxDecoration(
