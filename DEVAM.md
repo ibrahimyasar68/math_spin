@@ -16,6 +16,11 @@ services/ audio_service, question_generator, avatar_store, progress_store,
           settings_store
 assets/   icon/, sounds/ (clap, wrong, spin), google_fonts/ (Baloo2 + Nunito)
 privacy/index.html   -> GitHub Pages ile yayında
+store/listing_en.md  -> İngilizce mağaza metni (kopyala-yapıştır hazır)
+store/listing_tr.md  -> Türkçe kısa açıklama (ad + tam açıklama Console'dan
+                        doldurulacak)
+tools/ikon_duzelt.py -> ikon kart izini temizleyen betik
+IMZALAMA.md          -> anahtar yedekleme ve doğrulama (parola içermez)
 test/     8 dosya
 ```
 
@@ -103,10 +108,37 @@ Basamaklar: Blok 1 (K1-10) 1 basamak · Blok 2 (K11-20) 2 · Blok 3 (K21-30) 3
 2. 14 gün dolunca **Production**'a başvuru.
 
 **Yapılmayı bekleyen (opsiyonel)**
-- 🔑 **Keystore yedeği** — `~/mathspin-upload.jks` + parola. Kaybedilirse bu
-  uygulamaya bir daha güncelleme yayınlanamaz. **En öncelikli iş.**
-- İngilizce mağaza metni (erişimi genişletir)
-- İkonun iç kısmındaki çok soluk çerçeve izi (küçük boyutta görünmüyor)
+- 🔑 **Keystore yedeği** — dosyayı harici diske kopyalamak ve parolayı parola
+  yöneticisine yazmak **hâlâ yapılmadı**; adımlar ve doğrulama komutu
+  `IMZALAMA.md`'de. Not: Play App Signing etkinse kayıp geri dönüşsüz değil,
+  upload anahtarı Google'a başvuruyla yenilenebilir (birkaç iş günü) —
+  Play Console → Uygulama bütünlüğü ekranından teyit et.
+- ~~İngilizce mağaza metni~~ → `store/listing_en.md` hazır. Uygulama arayüzü
+  Türkçe olduğu için metnin sonunda bunu söyleyen bir paragraf var; arayüz
+  yerelleştirilirse o paragraf silinmeli.
+- ~~İkonun iç kısmındaki soluk çerçeve izi~~ → **düzeltildi** (aşağıya bak).
+
+## İkon (23 Ağu 2026'da düzeltildi)
+
+Kaynak görselde çizimin arkasında, tuvalden biraz daha açık, yuvarlak köşeli
+bir panel vardı. İki iz bırakıyordu: dört köşede ~30 birim koyulukta 2-3 px'lik
+keskin yay, ve panelin kendi aydınlık basamağı (asıl "çerçeve" hissi).
+`tools/ikon_duzelt.py` önce yayları büyük yarıçaplı medyanla siliyor, sonra
+çizimi maskeleyip arka plan alanını çok geniş Gauss ile tam sayfaya yayılan
+yumuşak ışığa çeviriyor; oluşan düzeltme farkı bütün görüntüye ekleniyor, bu
+yüzden dikiş izi olmuyor. `assets/icon/` içindeki iki PNG de işlendi, sonra:
+
+```bash
+dart run flutter_launcher_icons     # mipmap + ios ikonlarını yeniden üretir
+```
+
+Betik kaynaktan **birebir tekrar üretilebilir** (aynı SHA-1). Bir kez çalışır,
+çıktısına ikinci kez uygulanmamalı.
+
+- Play mağaza ikonu için 512×512 sürüm: `store_assets/store_icon_512.png`
+  (git'te değil). Mağazada **elle yeniden yüklenmeli**.
+- Kullanıcıların telefonundaki başlatıcı ikonunun değişmesi için **versionCode
+  3 + yeni `.aab`** gerekir; sadece asset değişmesi yetmez.
 
 ## Oturumda öğrenilen tuzaklar
 
@@ -116,6 +148,10 @@ Basamaklar: Blok 1 (K1-10) 1 basamak · Blok 2 (K11-20) 2 · Blok 3 (K21-30) 3
   + `install`, sonra **APK içindeki dosyanın hash'ini yereldekiyle karşılaştır**.
 - Emülatörde prefs dosyası ancak uygulama bir kez çalıştıktan sonra oluşur;
   kategori/yıldız ayarlamak için önce onboarding'i geçmek gerekiyor.
+- **Worktree'de `android/key.properties` yok** (gitignore'da). Worktree içinde
+  `flutter build appbundle --release` çalıştırılırsa yapı sessizce **debug**
+  imzasına düşer ve Play reddeder. Yayın yapıları ana dizinde alınmalı.
+- `README.md` güncel değil: 20 soruluk eski sürümü ve Fredoka'yı anlatıyor.
 - Oyun ekranı koordinatları (1080×2400 emülatör): klavye satırları
   y≈1537/1710/1880/2050, sütunlar x≈207/540/872, TAMAM y≈2245,
   **ÇEVİR y≈2040** (1/5 hizası sonrası; eski 2208 artık ıskalıyor).
