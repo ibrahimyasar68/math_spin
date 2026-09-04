@@ -31,11 +31,14 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   static const Duration _spinBase = Duration(milliseconds: 1500);
 
-  /// Cevap alanı içindeki kısa içeriğin (ÇEVİR butonu, doğru cevap kartı)
+  /// Cevap alanı içindeki kısa içeriğin (doğru cevap kartı, "Çevriliyor...")
   /// hizası. Alan sabit yükseklikte olduğu için klavyeden kısa fazlarda boşluk
   /// kalır; içerik bu boşluğun 1/5'i kadar yukarı alınır (alta yapışık değil,
   /// ortada da değil). Align'da y ekseni boş alanı -1..+1 tarar: alttan 1/5 =
   /// y 0.6.
+  ///
+  /// ÇEVİR butonu bu hizayı kullanmaz: o, cevap fazındaki TAMAM ile aynı yere
+  /// oturması için alanın tamamını kaplayıp alta hizalanır.
   static const Alignment _answerAlignment = Alignment(0, 0.6);
 
   // Oynanan kategori: oyun boyunca sabittir, sorular buna göre üretilir.
@@ -531,17 +534,24 @@ class _GameScreenState extends State<GameScreen> {
         if (_revealedAnswer) {
           return _RevealCard(question: _current);
         }
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: CandyButton(
-            label: 'ÇEVİR',
-            icon: Icons.casino_rounded,
-            color: AppColors.accent,
-            foreground: AppColors.ink,
-            height: 72,
-            fontSize: 30,
-            // Cevap çözülürken (tik/geri bildirim ekranı) kilitli.
-            onPressed: _resolving ? null : _spin,
+        // ÇEVİR, cevap fazındaki TAMAM ile **birebir aynı yerde** durur:
+        // alan zaten sabit yükseklikte, burada tüm yüksekliği kaplayıp butonu
+        // alta hizalıyoruz ve TAMAM'ın ölçülerini veriyoruz. Böylece çocuk
+        // fazlar arasında parmağını taşımak zorunda kalmıyor.
+        return SizedBox(
+          height: _AnswerPad.totalHeight,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: CandyButton(
+              label: 'ÇEVİR',
+              icon: Icons.casino_rounded,
+              color: AppColors.accent,
+              foreground: AppColors.ink,
+              height: _AnswerPad.submitHeight,
+              fontSize: 26,
+              // Cevap çözülürken (tik/geri bildirim ekranı) kilitli.
+              onPressed: _resolving ? null : _spin,
+            ),
           ),
         );
       case GamePhase.spinning:

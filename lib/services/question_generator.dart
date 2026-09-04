@@ -11,12 +11,12 @@ import '../models/question.dart';
 /// İşlemlerdeki sayıların basamak adedi kategori bandına bağlıdır. Sonucun
 /// basamak adedi ayrıca kısıtlanmaz, işlemin doğal çıktısıdır.
 ///
-///   - Kategori 1–10 : tek basamaklı sayılar   (1–9)
-///   - Kategori 11–20: iki basamaklı sayılar    (10–99)
-///   - Kategori 21–30: üç basamaklı sayılar     (100–999)  — %10 oranında
-///                     bazı sayılar 1–2 basamaklı da olabilir
-///   - Kategori 31–40: dört basamaklı sayılar   (1000–9999) — %15 oranında
-///                     bazı sayılar 1–3 basamaklı da olabilir
+///   - Kategori 1–10 : tek basamaklı sayılar (1–9)
+///   - Kategori 11–20: iki basamaklı sayılar  (10–99) — %5 oranında bazı
+///                     sorular tek basamaklı sayılarla gelir
+///
+/// Üç ve dört basamaklı bantlar (eski kategori 21–40) 28 Ağu 2026'da plandan
+/// çıkarıldı; oyun iki bantta, 20 kategoride bitiyor.
 ///
 /// Bant içi çeşitlilik: bandın başında yalnız toplama/çıkarma, ortasında
 /// çarpma, sonunda bölme de eklenir.
@@ -30,10 +30,10 @@ class QuestionGenerator {
   /// Bir bandın kapsadığı kategori adedi (1–10, 11–20, ...).
   static const int bandSize = 10;
 
-  /// Bant sayısı: her biri bir basamak adedine karşılık gelir (1, 2, 3, 4).
-  static const int bandCount = 4;
+  /// Bant sayısı: her biri bir basamak adedine karşılık gelir (1, 2).
+  static const int bandCount = 2;
 
-  static const int maxCategory = bandSize * bandCount; // 40
+  static const int maxCategory = bandSize * bandCount; // 20
 
   /// Soru adedinin azalmaya başladığı sıra: bu sıraya kadar tam
   /// [totalQuestions] soru sorulur.
@@ -69,31 +69,18 @@ class QuestionGenerator {
     if (category <= 10) {
       return (digits: 1, lo: 1, hi: 9, first: 1, last: 10, mixRatio: 0.0);
     }
-    if (category <= 20) {
-      return (digits: 2, lo: 10, hi: 99, first: 11, last: 20, mixRatio: 0.0);
-    }
-    if (category <= 30) {
-      // %10 oranında 1–2 basamaklı sayılar da karışır.
-      return (digits: 3, lo: 100, hi: 999, first: 21, last: 30, mixRatio: 0.10);
-    }
-    // 31–40 (40 son kategori): %15 oranında 1–3 basamaklı sayılar da karışır.
-    return (
-      digits: 4,
-      lo: 1000,
-      hi: 9999,
-      first: 31,
-      last: 40,
-      mixRatio: 0.15
-    );
+    // 11–20 (20 son kategori): %5 oranında tek basamaklı sayılar da karışır.
+    // Oran bilerek düşük — bant zaten iki basamakla sınırlı, karışım burada
+    // zorluğu düşürmek için değil, tekdüzeliği kırmak için var.
+    return (digits: 2, lo: 10, hi: 99, first: 11, last: 20, mixRatio: 0.05);
   }
 
-  /// Banttan bir işlem sayısı üretir.
-  ///
-  /// [mixRatio] olasılıkla daha küçük basamaklı (1..digits-1 arası rastgele
-  /// seçilen bir basamak adedinde) bir sayı döner; böylece üst bantlarda
-  /// arada kolay sayılar da görünür.
   /// Bir sorunun sayılarının çekileceği aralık: [mixRatio] olasılıkla daha
   /// küçük basamaklı bir aralık, aksi hâlde bandın kendi aralığı.
+  ///
+  /// İki bantlı planda yalnızca 2. bant karışır (%5): 1. bandın basamağı zaten
+  /// 1 olduğu için altına inilecek bir aralık yok, [mixRatio] orada 0 kalır ve
+  /// `digits > 1` koşulu bandı dışarıda tutar.
   ({int lo, int hi}) _operandRange() {
     final b = _band;
     if (b.mixRatio > 0 && b.digits > 1 && _rng.nextDouble() < b.mixRatio) {

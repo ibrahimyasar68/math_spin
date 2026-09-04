@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/audio_service.dart';
 import 'services/progress_store.dart';
+import 'services/puzzle_store.dart';
 import 'services/settings_store.dart';
 
 Future<void> main() async {
@@ -35,6 +36,9 @@ Future<void> main() async {
   await AudioService.instance.init();
   // Kayıtlı ilerlemeyi (kategori + avatar) yükle.
   await ProgressStore.instance.init();
+  // Puzzle mağazası kategoriyi dinler; ProgressStore yüklendikten sonra
+  // başlatılmalı ki açılıştaki yükleme puzzle'ı sıfırlamasın.
+  await PuzzleStore.instance.init();
   runApp(const MathSpinApp());
 }
 

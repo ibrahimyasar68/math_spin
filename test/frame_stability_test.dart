@@ -46,4 +46,25 @@ void main() {
     expect(afterDigit, answering,
         reason: 'Rakam girilince çerçeve oynamamalı');
   });
+
+  testWidgets('ÇEVİR butonu TAMAM ile aynı yerde ve aynı boyutta durur',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(420, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(const MaterialApp(home: GameScreen()));
+    await tester.pump();
+
+    final spinRect = tester.getRect(find.widgetWithText(CandyButton, 'ÇEVİR'));
+
+    await tester.tap(find.text('ÇEVİR'));
+    for (var i = 0; i < 40 && find.text('TAMAM').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    final submitRect = tester.getRect(find.widgetWithText(CandyButton, 'TAMAM'));
+
+    expect(spinRect, submitRect,
+        reason: 'Çocuk fazlar arasında parmağını taşımamalı.\n'
+            'ÇEVİR: $spinRect\nTAMAM: $submitRect');
+  });
 }

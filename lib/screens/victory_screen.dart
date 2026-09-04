@@ -347,7 +347,8 @@ class _JourneySummary extends StatelessWidget {
           item(Icons.emoji_events_rounded, '${QuestionGenerator.maxCategory}',
               'kategori'),
           item(Icons.calculate_rounded, '$questions', 'soru'),
-          item(Icons.auto_awesome_rounded, '4', 'basamak'),
+          item(Icons.auto_awesome_rounded, '${QuestionGenerator.bandCount}',
+              'basamak'),
         ],
       ),
     );
