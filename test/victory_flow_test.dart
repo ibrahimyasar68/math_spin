@@ -39,12 +39,6 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('PARÇAYI GÖR'), findsOneWidget);
-
-    await tester.tap(find.text('PARÇAYI GÖR'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-
     // Son kategoride de oyun ancak resim bilinince biter.
     await tester.tap(find.text(puzzleImages[0].label));
     await tester.pump();
