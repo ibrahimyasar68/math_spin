@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../widgets/animal_paintings.dart';
@@ -53,4 +55,82 @@ const List<PuzzleImage> puzzleImages = [
     backdrop: Color(0xFFF3C4DC),
     painter: RabbitPainter.new,
   ),
+  PuzzleImage(
+    id: 'kedi',
+    label: 'KEDİ',
+    backdrop: Color(0xFFF6D9A8),
+    painter: CatPainter.new,
+  ),
+  PuzzleImage(
+    id: 'kopek',
+    label: 'KÖPEK',
+    backdrop: Color(0xFF9FD4E8),
+    painter: DogPainter.new,
+  ),
+  PuzzleImage(
+    id: 'kus',
+    label: 'KUŞ',
+    backdrop: Color(0xFFBFD9F2),
+    painter: BirdPainter.new,
+  ),
+  PuzzleImage(
+    id: 'fil',
+    label: 'FİL',
+    backdrop: Color(0xFFF7D6B0),
+    painter: ElephantPainter.new,
+  ),
+  PuzzleImage(
+    id: 'aslan',
+    label: 'ASLAN',
+    backdrop: Color(0xFF9BD6C0),
+    painter: LionPainter.new,
+  ),
+  PuzzleImage(
+    id: 'kurbaga',
+    label: 'KURBAĞA',
+    backdrop: Color(0xFFCFE0F5),
+    painter: FrogPainter.new,
+  ),
+  PuzzleImage(
+    id: 'balik',
+    label: 'BALIK',
+    backdrop: Color(0xFF7FD3E0),
+    painter: FishPainter.new,
+  ),
+  PuzzleImage(
+    id: 'koyun',
+    label: 'KOYUN',
+    backdrop: Color(0xFFAFD6A8),
+    painter: SheepPainter.new,
+  ),
+  PuzzleImage(
+    id: 'tilki',
+    label: 'TİLKİ',
+    backdrop: Color(0xFFD8CDEC),
+    painter: FoxPainter.new,
+  ),
 ];
+
+/// Tahmin şıkları: doğru cevap + havuzdan rastgele yanlışlar, karıştırılmış.
+///
+/// Şıklar havuzun tamamı değil sabit sayıda ([count]) olduğu için havuz
+/// büyüdükçe tahmin zorlaşmaz; zorluk şık sayısına bağlı kalır. Her çağrıda
+/// yeniden çekildiği için aynı yanlışlar tekrar gelip eleme yoluyla kolay
+/// geçiş sağlamaz.
+List<PuzzleImage> buildChoices(
+  PuzzleImage correct, {
+  int count = 4,
+  Random? rng,
+}) {
+  final r = rng ?? Random();
+  final digerleri = [
+    for (final image in puzzleImages)
+      if (image.id != correct.id) image,
+  ]..shuffle(r);
+
+  final secilenler = <PuzzleImage>[
+    correct,
+    ...digerleri.take(count - 1),
+  ]..shuffle(r);
+  return secilenler;
+}

@@ -2,16 +2,16 @@
 
 Proje dizini: `/Users/ibrahimyasar/Desktop/mathSpin`
 Depo: https://github.com/ibrahimyasar68/math_spin (main ile senkron)
-Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **33 test geçiyor**.
+Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **42 test geçiyor**.
 
 ## Yapı
 
 ```
 lib/main.dart
-screens/  home, game, result, puzzle, settings, cake_celebration, victory
+screens/  home, game, result, settings, cake_celebration, victory
 widgets/  slot_reel, confetti_overlay, starry_background, candy_button,
-          feedback_badge, mascot, avatar_picker, puzzle_board,
-          animal_paintings
+          feedback_badge, mascot, avatar_picker, puzzle_panel, puzzle_board,
+          animal_paintings (12 hayvan)
 models/   question.dart, puzzle_image.dart
 services/ audio_service, question_generator, avatar_store, progress_store,
           settings_store, puzzle_store
@@ -95,36 +95,52 @@ bölmeler, negatif olmayan çıkarma.
 aralığına kırptığı için, eski sürümde 21+ kategoriye gelmiş test cihazları
 açılışta sessizce **K20'ye** düşer. Ayrı bir göç kodu gerekmedi.
 
-## Puzzle — kategori geçişi (28 Ağu 2026'da eklendi)
+## Yapboz — kategori geçişi (28 Ağu 2026)
 
-Kategori artık **matematik puanıyla geçilmiyor**. Her kategoriye bir hayvan
-resmi atanır, resim **10 parçaya** bölünür (5 satır × 2 sütun) ve kapalı durur.
+Kategori **matematik puanıyla geçilmiyor**. Her kategoriye 12 hayvandan biri
+atanır, resim **10 gerçek yapboz parçasına** bölünür ve kapalı durur.
 
 | Olay | Sonuç |
 |---|---|
-| Oyun bitti, puan **≥ %80** | Rastgele **bir parça açılır** + tahmin hakkı |
-| Oyun bitti, puan **< %80** | Parça açılmaz, **tahmin hakkı yok** |
+| Oyun bitti, puan **≥ %80** | Rastgele **bir parça açılır** |
+| Oyun bitti, puan **< %80** | Parça açılmaz |
+| Her oyundan sonra | **4 şık** sorulur (doğru + 3 rastgele yanlış) |
 | Tahmin **doğru** | Kategori geçilir → pasta → sonraki kategori |
 | Tahmin **yanlış** | Kategori aynı kalır, açık parçalar korunur |
 
-Akış: oyun → sonuç ekranı → **puzzle** → (doğruysa) pasta → oyun.
+Akış: oyun → **sonuç ekranı (yapboz içinde)** → oyun. Yapbozun ayrı ekranı yok;
+iki oyun arasında tek durak olsun diye sonuç ekranının gövdesine kondu
+(`widgets/puzzle_panel.dart`). Yer açmak için soru soru özet listesi yerini
+✓/✗ rozet şeridine bıraktı.
 
-- Tahmin hakkının barajla gelmesi bilinçli: yoksa çocuk hiç matematik yapmadan,
-  her turda rastgele şıkka basarak kategori geçebilirdi. Gevşetmek istenirse
-  `PuzzleScreen.canGuess`'i besleyen `ResultScreen._passed` bağı değiştirilir.
-- Resimler **kodda vektör olarak çiziliyor** (`widgets/animal_paintings.dart`,
-  maskotla aynı teknik) — asset yok, uygulama boyutu artmadı. Şimdilik at, ayı,
-  tavşan. Yeni hayvan eklemek `models/puzzle_image.dart` içindeki listeye tek
-  satır; şıklar ve rastgele seçim otomatik uyar.
-- **Üç resim geçişi zayıflatıyor**: şıklar havuzun tamamı olduğu için kör
-  tahminde isabet 1/3, üstelik çocuk üç hayvanı kısa sürede tanıyor. Asıl çözüm
-  resim sayısını artırmak.
+**İlk sürümde oturmayan dört şey ve çözümleri** (hepsi bu revizyonda):
+
+1. *Tahmin çok kolaydı* — 3 resim vardı ve şıklar hep aynı üçüydü. Havuz
+   **12 hayvana** çıktı ve şıklar havuzun tamamı değil **4 tane**; kör tahminde
+   isabet 1/3'ten 1/4'e indi, ezberleme yolu kapandı.
+2. *Akış uzundu* — ayrı yapboz ekranı kaldırıldı (yukarıya bak).
+3. *Baraj altında tahmin yoktu* — kalktı, artık her oyundan sonra tahmin var.
+   **Sonucu bilinçli kabul edildi**: 4 şıkta kör tahmin ortalama ~4 oyunda bir
+   kategori geçirir, yani matematik yapmadan da ilerlenebilir. Matematiği
+   anlamlı tutan tek şey parçaların yalnızca barajla gelmesi.
+4. *Görünüş* — düz dikdörtgen ızgara yerine **tırtıklı yapboz parçaları**.
+
+Teknik notlar:
+
+- Parça yolları `widgets/puzzle_board.dart`. Kenar tırtığı t=0.5 ekseninde
+  **simetrik** çizildiği için kenar ters yönde taransa da aynı eğri çıkar;
+  komşu iki parça bu sayede boşluksuz ve çakışmasız oturur. `puzzle_test.dart`
+  bunu `Path.combine` ile kanıtlıyor (birleşim = tahta, kesişim ≈ 0).
+- Kenar yönleri resmin `id`'sinden türeyen sabit tohumla belirlenir: aynı resim
+  her açılışta aynı biçimde bölünür.
+- Tahta tek `CustomPaint`; tırtıklar komşu hücreye taştığı için parça başına
+  ayrı kutu (Positioned + ClipRect) yetmiyordu.
+- Resimler kodda **vektör** çiziliyor (`widgets/animal_paintings.dart`), asset
+  yok. Yeni hayvan eklemek: bir `AnimalPainter` alt sınıfı + `puzzle_image.dart`
+  listesine bir satır. Şıklar ve rastgele seçim kendiliğinden uyar.
 - `PuzzleStore` kategoriyi **dinler**: kategori hangi sebeple değişirse değişsin
-  (geçiş ya da baştan başlama) parçalar kapanır ve önceki resimden farklı yeni
-  bir resim atanır. Sıfırlamayı elle çağırmayı unutabileceğimiz yer kalmadı.
+  parçalar kapanır, önceki resimden farklı yeni bir resim atanır.
 - Kalıcı: `puzzle.imageIndex`, `puzzle.revealedMask` (10 bitlik maske).
-- 10 parça da açıldıysa resim tamamen görünür; tahmin hakkı barajla gelmeye
-  devam eder, kilitlenme olmaz.
 
 ## Bitirme senaryosu ve yıldızlar
 
