@@ -2,7 +2,7 @@
 
 Proje dizini: `/Users/ibrahimyasar/Desktop/mathSpin`
 Depo: https://github.com/ibrahimyasar68/math_spin (main ile senkron)
-Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **42 test geçiyor**.
+Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **41 test geçiyor**.
 
 ## Yapı
 
