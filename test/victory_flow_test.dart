@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mathspin/models/puzzle_image.dart';
 import 'package:mathspin/models/question.dart';
 import 'package:mathspin/screens/result_screen.dart';
 import 'package:mathspin/screens/victory_screen.dart';
 import 'package:mathspin/services/progress_store.dart';
+import 'package:mathspin/services/puzzle_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -19,9 +21,10 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     ProgressStore.instance.stars.value = 0;
+    PuzzleStore.instance.debugSet(image: 0, mask: 0);
   });
 
-  testWidgets('Son kategori geçilince OYUNU BİTİR pasta üzerinden zafere '
+  testWidgets('Son kategoride doğru tahmin final pastası üzerinden zafere '
       'götürür', (tester) async {
     await tester.binding.setSurfaceSize(const Size(420, 950));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -36,12 +39,17 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('OYUNU BİTİR'), findsOneWidget);
-    expect(find.text('SONRAKİ KATEGORİ'), findsNothing);
+    expect(find.text('PARÇAYI GÖR'), findsOneWidget);
 
-    await tester.tap(find.text('OYUNU BİTİR'));
+    await tester.tap(find.text('PARÇAYI GÖR'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Son kategoride de oyun ancak resim bilinince biter.
+    await tester.tap(find.text(puzzleImages[0].label));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Mumları üfle! 🎂'), findsOneWidget);
     expect(find.text('0 / 10'), findsOneWidget,

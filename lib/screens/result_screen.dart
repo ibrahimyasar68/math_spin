@@ -5,22 +5,23 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/question.dart';
 import '../services/avatar_store.dart';
 import '../services/progress_store.dart';
+import '../services/puzzle_store.dart';
 import '../theme/app_colors.dart';
 import '../widgets/candy_button.dart';
 import '../widgets/confetti_overlay.dart';
 import '../widgets/mascot.dart';
 import '../widgets/starry_background.dart';
-import 'cake_celebration_screen.dart';
-import 'game_screen.dart';
-import 'victory_screen.dart';
+import 'puzzle_screen.dart';
 
 /// Kategori sonu özet ekranı.
 ///
-/// Puan yüzde olarak hesaplanır (doğru / toplam × 100); 80 puan ve üzeri bir
-/// üst kategoriye geçirir. Soru adedi kategoriye göre değiştiği için (10'dan
-/// 5'e kadar) sabit "her doğru 10 puan" kuralı kullanılamaz: 7 soruluk bir
-/// kategoride en fazla 70 puan çıkar ve baraj asla geçilemezdi.
-/// Geçiş burada [ProgressStore]'a yazılır.
+/// Puan yüzde olarak hesaplanır (doğru / toplam × 100). Soru adedi kategoriye
+/// göre değiştiği için (10'dan 5'e kadar) sabit "her doğru 10 puan" kuralı
+/// kullanılamaz: 7 soruluk bir kategoride en fazla 70 puan çıkar ve baraj asla
+/// geçilemezdi.
+///
+/// 80 puan ve üzeri **kategoriyi geçirmez**, bir puzzle parçası kazandırır;
+/// kategori [PuzzleScreen] içinde resmi doğru tahmin edince geçilir.
 class ResultScreen extends StatefulWidget {
   /// Oynanan kategori.
   final int category;
@@ -53,12 +54,16 @@ class _ResultScreenState extends State<ResultScreen> {
 
   bool get _isFinalCategory => widget.category >= ProgressStore.maxCategory;
 
+  /// Bu turda açılan puzzle parçası (baraj geçilmediyse `null`).
+  int? _newPiece;
+
   @override
   void initState() {
     super.initState();
-    // Barajı geçen oyuncu bir üst kategoriye taşınır ve kaydedilir.
-    if (_passed && !_isFinalCategory) {
-      ProgressStore.instance.setCategory(widget.category + 1);
+    // Kategori artık burada geçilmez: geçiş, puzzle ekranındaki doğru tahminle
+    // olur. Barajı geçmenin ödülü resimden rastgele bir parçanın açılması.
+    if (_passed) {
+      _newPiece = PuzzleStore.instance.revealPiece();
     }
     _confetti =
         ConfettiController(duration: const Duration(seconds: 3));
@@ -81,14 +86,14 @@ class _ResultScreenState extends State<ResultScreen> {
     if (_passed && _isFinalCategory) {
       return (
         emoji: '🏆',
-        message: 'Şampiyon! Tüm kategorileri bitirdin!',
+        message: 'Son kategoriyi geçtin! Resmi bilirsen oyun biter.',
         mood: MascotMood.happy,
       );
     }
     if (_passed) {
       return (
-        emoji: '🎉',
-        message: 'Tebrikler! Kategori ${widget.category + 1}\'e geçtin!',
+        emoji: '🧩',
+        message: 'Harika! Bir puzzle parçası kazandın.',
         mood: MascotMood.happy,
       );
     }
@@ -106,49 +111,22 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
-  /// Final pastasındaki mum sayısı.
+  /// Sonuç ekranından her hâlükârda puzzle ekranına geçilir.
   ///
-  /// Her kategori için bir mum koymak (40) üflemesi uzun sürdüğü ve küçük
-  /// ekranda sıkıştığı için sabit tutuldu.
-  static const int _finalCandles = 10;
-
-  /// Buton her zaman güncel (kayıtlı) kategoriden yeni oyun başlatır:
-  /// geçildiyse üst kategori, geçilemediyse aynı kategori.
-  ///
-  /// Bir üst kategoriye geçişte önce yaş pasta kutlaması gösterilir: oyuncu
-  /// o ana kadar geçtiği kategori sayısı kadar mumu üfleyip söndürünce oyuna
-  /// devam edilir.
-  ///
-  /// Son kategori geçildiyse oyun biter: büyük pastanın ardından şampiyonluk
-  /// ekranı gelir.
-  void _playAgain() {
-    if (_passed && _isFinalCategory) {
-      // Oyun bitti: doruk noktası olarak büyük pasta, sonra final ekranı.
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const CakeCelebrationScreen(
-            candleCount: _finalCandles,
-            nextBuilder: _buildVictory,
-          ),
+  /// Kategori geçişi, pasta kutlaması ve oyunun bitişi artık orada, doğru
+  /// tahminin ardından kurgulanır ([PuzzleScreen]). Baraj geçilmediyse puzzle
+  /// yalnızca mevcut parçaları gösterir ve tahmin hakkı vermez.
+  void _toPuzzle() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => PuzzleScreen(
+          category: widget.category,
+          canGuess: _passed,
+          newPiece: _newPiece,
         ),
-      );
-    } else if (_passed) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => CakeCelebrationScreen(
-            candleCount: widget.category, // geçilen kategori sayısı kadar mum
-            nextBuilder: (_) => const GameScreen(),
-          ),
-        ),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const GameScreen()),
-      );
-    }
+      ),
+    );
   }
-
-  static Widget _buildVictory(BuildContext context) => const VictoryScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -201,18 +179,12 @@ class _ResultScreenState extends State<ResultScreen> {
                     Expanded(child: _SummaryList(results: widget.results)),
                     const SizedBox(height: 12),
                     CandyButton(
-                      label: _passed
-                          ? (_isFinalCategory
-                              ? 'OYUNU BİTİR'
-                              : 'SONRAKİ KATEGORİ')
-                          : 'TEKRAR DENE',
-                      icon: _passed
-                          ? Icons.arrow_forward_rounded
-                          : Icons.refresh_rounded,
+                      label: _passed ? 'PARÇAYI GÖR' : 'BULMACAYA GEÇ',
+                      icon: Icons.extension_rounded,
                       color: AppColors.success,
                       height: 68,
                       fontSize: 26,
-                      onPressed: _playAgain,
+                      onPressed: _toPuzzle,
                     ),
                     const SizedBox(height: 16),
                   ],
