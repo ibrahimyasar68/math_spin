@@ -7,6 +7,7 @@ import 'package:mathspin/screens/result_screen.dart';
 import 'package:mathspin/services/progress_store.dart';
 import 'package:mathspin/services/puzzle_store.dart';
 import 'package:mathspin/services/settings_store.dart';
+import 'package:mathspin/widgets/puzzle_panel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -46,18 +47,19 @@ void main() {
     progress.category.value = 4;
   });
 
+  /// Oyundaki gerçek uzunlukla aynı: her kategori 5 soru.
   Future<void> sonucEkrani(WidgetTester tester, {required int dogru}) async {
     await tester.binding.setSurfaceSize(const Size(420, 950));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      MaterialApp(home: ResultScreen(category: 4, results: score(10, dogru))),
+      MaterialApp(home: ResultScreen(category: 4, results: score(5, dogru))),
     );
     await tester.pump();
   }
 
   testWidgets('Yapboz sonuç ekranının içinde: ayrı ekran açılmaz',
       (tester) async {
-    await sonucEkrani(tester, dogru: 8);
+    await sonucEkrani(tester, dogru: 4);
 
     // Puan şeridi ve yapboz aynı ekranda.
     expect(find.text('Kategori 4'), findsOneWidget);
@@ -66,25 +68,44 @@ void main() {
   });
 
   testWidgets('Barajı geçmek bir parça açar', (tester) async {
-    await sonucEkrani(tester, dogru: 8);
+    await sonucEkrani(tester, dogru: 4);
 
     expect(puzzle.revealedCount, 1);
     expect(find.text('Yeni parça açıldı!'), findsOneWidget);
   });
 
-  testWidgets('Baraj altında parça açılmaz ama tahmin hakkı verilir',
+  testWidgets('Baraj altında yapboz hiç gösterilmez, kategori başarısız olur',
       (tester) async {
-    await sonucEkrani(tester, dogru: 5);
+    await sonucEkrani(tester, dogru: 2);
 
     expect(puzzle.revealedCount, 0, reason: 'Parça yalnızca barajla gelir');
-    expect(find.text('0 / 10 parça'), findsOneWidget);
-    // Yeni kural: baraj altında da tahmin edilebilir.
-    expect(find.text(dogruSik()), findsOneWidget);
+    expect(find.text('BAŞARISIZ'), findsOneWidget);
+    expect(find.textContaining('Kategori 4 baştan'), findsOneWidget);
+
+    // Ne tahta ne sayaç ne şık: yapbozun hiçbir parçası görünmemeli.
+    expect(find.byType(PuzzlePanel), findsNothing);
+    expect(find.textContaining('/ 10 parça'), findsNothing,
+        reason: 'Parça sayacı görünmemeli');
+    for (final image in puzzleImages) {
+      expect(find.text(image.label), findsNothing);
+    }
+  });
+
+  testWidgets('Başarısız kategoride TEKRAR DENE aynı kategoriye döndürür',
+      (tester) async {
+    await sonucEkrani(tester, dogru: 2);
+
+    await tester.tap(find.text('TEKRAR DENE'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(progress.category.value, 4, reason: 'Kategori değişmemeli');
+    expect(find.byType(GameScreen), findsOneWidget);
   });
 
   testWidgets('Dört şık gelir ve doğru cevap her zaman içindedir',
       (tester) async {
-    await sonucEkrani(tester, dogru: 8);
+    await sonucEkrani(tester, dogru: 4);
 
     final gorunen = [
       for (final image in puzzleImages)
@@ -96,7 +117,7 @@ void main() {
 
   testWidgets('Doğru tahmin kategoriyi geçirir ve pastaya götürür',
       (tester) async {
-    await sonucEkrani(tester, dogru: 8);
+    await sonucEkrani(tester, dogru: 4);
 
     await tester.tap(find.text(dogruSik()));
     await tester.pump();
@@ -111,7 +132,7 @@ void main() {
 
   testWidgets('Yanlış tahminde kategori değişmez, parçalar durur',
       (tester) async {
-    await sonucEkrani(tester, dogru: 8);
+    await sonucEkrani(tester, dogru: 4);
     final oncekiMaske = puzzle.revealedMask.value;
 
     await tester.tap(find.text(yanlisSik()));
@@ -129,7 +150,7 @@ void main() {
 
   testWidgets('Tek tahmin hakkı: ilk seçimden sonra şıklar kilitlenir',
       (tester) async {
-    await sonucEkrani(tester, dogru: 8);
+    await sonucEkrani(tester, dogru: 4);
 
     await tester.tap(find.text(yanlisSik()));
     await tester.pump();
@@ -147,7 +168,8 @@ void main() {
   testWidgets('Tüm parçalar açıkken tahmin sorulmaya devam eder',
       (tester) async {
     puzzle.debugSet(mask: (1 << PuzzleStore.pieceCount) - 1);
-    await sonucEkrani(tester, dogru: 5); // baraj altı: yeni parça gelmez
+    // Tüm parçalar zaten açık: barajı geçse de yeni parça gelmez.
+    await sonucEkrani(tester, dogru: 4);
 
     expect(find.text('Resmin tamamı açık!'), findsOneWidget);
     expect(find.text('10 / 10 parça'), findsOneWidget);

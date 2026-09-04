@@ -25,9 +25,9 @@ void main() {
     expect(find.textContaining('/ 20'), findsNothing);
   });
 
-  test('Bant başı kategoride 10 soru; yalnız toplama/çıkarma', () {
+  test('Bant başı kategoride yalnız toplama/çıkarma', () {
     final qs = QuestionGenerator(category: 1).generateAll();
-    expect(qs.length, 10);
+    expect(qs.length, QuestionGenerator.totalQuestions);
 
     for (final q in qs) {
       expect(q.op == MathOp.add || q.op == MathOp.sub, isTrue,
@@ -40,31 +40,32 @@ void main() {
     }
   });
 
-  test('Soru adedi bant içindeki sıraya göre azalır (10..10,9,8,7,6,5)', () {
-    // Banttaki sıra -> beklenen soru adedi.
-    const expected = [
-      10, 10, 10, 10, 10, // sıra 1–5
-      9, 8, 7, 6, 5, // sıra 6–10
-    ];
-
-    for (var band = 0; band < QuestionGenerator.bandCount; band++) {
-      for (var pos = 1; pos <= 10; pos++) {
-        final cat = band * 10 + pos;
-        final want = expected[pos - 1];
-        expect(QuestionGenerator.questionCountFor(cat), want,
-            reason: 'kategori $cat (bant ${band + 1}, sıra $pos)');
-        expect(QuestionGenerator(category: cat).generateAll().length, want,
-            reason: 'kategori $cat üretilen soru adedi');
-      }
+  test('Her kategoride 5 soru sorulur (kademeli azalma yok)', () {
+    for (var cat = 1; cat <= QuestionGenerator.maxCategory; cat++) {
+      expect(QuestionGenerator.questionCountFor(cat), 5,
+          reason: 'kategori $cat soru adedi');
+      expect(QuestionGenerator(category: cat).generateAll().length, 5,
+          reason: 'kategori $cat üretilen soru adedi');
     }
 
-    // Uç noktalar: çizelgedeki kritik kategoriler.
-    expect(QuestionGenerator.questionCountFor(5), 10);
-    expect(QuestionGenerator.questionCountFor(10), 5);
-    expect(QuestionGenerator.questionCountFor(11), 10);
-    expect(QuestionGenerator.questionCountFor(20), 5);
+    expect(QuestionGenerator.totalQuestions, 5);
     expect(QuestionGenerator.maxCategory, 20,
         reason: 'İki bantlı planda oyun 20 kategoride biter');
+
+    // Oyunun toplam soru sayısı: 20 kategori x 5 = 100.
+    var toplam = 0;
+    for (var cat = 1; cat <= QuestionGenerator.maxCategory; cat++) {
+      toplam += QuestionGenerator.questionCountFor(cat);
+    }
+    expect(toplam, 100);
+  });
+
+  test('5 soruda baraj tek yanlışa izin verir', () {
+    // Yüzde puan: doğru / toplam x 100, baraj 80.
+    int puan(int dogru) => (dogru * 100 / 5).round();
+    expect(puan(5), 100);
+    expect(puan(4), 80, reason: '4 doğru barajı tam tutturur');
+    expect(puan(3), 60, reason: '2 yanlış barajın altında kalır');
   });
 
   test('1. bantta (kategori 1–10) sayılar hep tek basamaklıdır', () {

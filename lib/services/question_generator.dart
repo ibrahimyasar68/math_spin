@@ -4,9 +4,9 @@ import '../models/question.dart';
 
 /// Seçilen kategoriye göre bir soru seti üretir.
 ///
-/// Soru adedi bandın içindeki sıraya göre azalır: ilk 5 kategoride 10 soru,
-/// sonraki beş kategoride sırasıyla 9, 8, 7, 6 ve 5 soru. Bandın sonuna doğru
-/// sorular zorlaştığı için sayıları da azalır ([questionCountFor]).
+/// Soru adedi **her kategoride 5**'tir ([totalQuestions]). Önceden bant içinde
+/// kademeli azalıyordu (10'dan 5'e); 28 Ağu 2026'da kaldırıldı — her kategori
+/// aynı uzunlukta, tek değişen zorluk.
 ///
 /// İşlemlerdeki sayıların basamak adedi kategori bandına bağlıdır. Sonucun
 /// basamak adedi ayrıca kısıtlanmaz, işlemin doğal çıktısıdır.
@@ -24,8 +24,11 @@ import '../models/question.dart';
 /// Çarpma ve bölmede yalnız ilk sayı banda göre büyür; çarpan/bölen çocuk
 /// dostu ve sonuç girilebilir kalması için 2–9 aralığında tutulur.
 class QuestionGenerator {
-  /// Bandın ilk 5 kategorisindeki (ve varsayılan) soru adedi.
-  static const int totalQuestions = 10;
+  /// Her kategorideki soru adedi.
+  ///
+  /// %80 barajıyla birlikte anlamı: 5 soruda **4 doğru** gerekiyor, yani her
+  /// kategoride tek yanlış hakkı var.
+  static const int totalQuestions = 5;
 
   /// Bir bandın kapsadığı kategori adedi (1–10, 11–20, ...).
   static const int bandSize = 10;
@@ -35,19 +38,13 @@ class QuestionGenerator {
 
   static const int maxCategory = bandSize * bandCount; // 20
 
-  /// Soru adedinin azalmaya başladığı sıra: bu sıraya kadar tam
-  /// [totalQuestions] soru sorulur.
-  static const int _fullCountPositions = 5;
-
-  /// [category] için soru adedi.
+  /// [category] için soru adedi — kategoriden bağımsız olarak
+  /// [totalQuestions].
   ///
-  /// Banttaki sıra 1–5 ise 10 soru; 6, 7, 8, 9, 10. sıralarda sırasıyla
-  /// 9, 8, 7, 6 ve 5 soru.
-  static int questionCountFor(int category) {
-    final pos = (category - 1) % bandSize + 1; // banttaki sıra: 1..10
-    if (pos <= _fullCountPositions) return totalQuestions;
-    return totalQuestions - (pos - _fullCountPositions); // 6->9 ... 10->5
-  }
+  /// İmza kategori alıyor: çağıran yerler (zafer ekranı özeti, testler) soru
+  /// toplamını buradan hesaplıyor, ileride yeniden kategoriye bağlanmak
+  /// istenirse tek yer değişsin diye korundu.
+  static int questionCountFor(int category) => totalQuestions;
 
   final int category;
   final Random _rng;

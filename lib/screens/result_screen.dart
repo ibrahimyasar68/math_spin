@@ -8,6 +8,7 @@ import '../services/progress_store.dart';
 import '../services/puzzle_store.dart';
 import '../theme/app_colors.dart';
 import '../widgets/confetti_overlay.dart';
+import '../widgets/candy_button.dart';
 import '../widgets/mascot.dart';
 import '../widgets/puzzle_panel.dart';
 import '../widgets/starry_background.dart';
@@ -157,6 +158,16 @@ class _ResultScreenState extends State<ResultScreen> {
     );
   }
 
+  /// Baraj geçilemedi: aynı kategori baştan oynanır.
+  ///
+  /// [ProgressStore] kategorisine dokunulmuyor; oyun ekranı kayıtlı kategoriden
+  /// başladığı için oyuncu aynı kategoriye döner.
+  void _retryCategory() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const GameScreen()),
+    );
+  }
+
   static Widget _buildVictory(BuildContext context) => const VictoryScreen();
 
   @override
@@ -218,11 +229,19 @@ class _ResultScreenState extends State<ResultScreen> {
                     const SizedBox(height: 8),
                     _ResultChips(results: widget.results),
                     const SizedBox(height: 10),
+                    // Baraj geçilmediyse yapboz hiç gösterilmez: kategori
+                    // başarısız sayılır ve baştan tekrar edilir. Parça da
+                    // tahmin hakkı da matematikle kazanılıyor.
                     Expanded(
-                      child: PuzzlePanel(
-                        newPiece: _newPiece,
-                        onGuessed: _onGuessed,
-                      ),
+                      child: _passed
+                          ? PuzzlePanel(
+                              newPiece: _newPiece,
+                              onGuessed: _onGuessed,
+                            )
+                          : _FailedPanel(
+                              category: widget.category,
+                              onRetry: _retryCategory,
+                            ),
                     ),
                     const SizedBox(height: 12),
                   ],
@@ -329,6 +348,80 @@ class _ResultChips extends StatelessWidget {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// Baraj geçilemediğinde yapbozun yerine görünen bölüm.
+class _FailedPanel extends StatelessWidget {
+  final int category;
+  final VoidCallback onRetry;
+
+  const _FailedPanel({required this.category, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.danger.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: AppColors.danger, width: 2),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.replay_circle_filled_rounded,
+                      color: AppColors.danger, size: 54),
+                  const SizedBox(height: 10),
+                  Text(
+                    'BAŞARISIZ',
+                    style: GoogleFonts.baloo2(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Geçmek için 80 puan gerekiyor.\n'
+                    'Kategori $category baştan tekrar edilecek.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Yapboz parçası yalnızca barajı geçince açılır.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        CandyButton(
+          label: 'TEKRAR DENE',
+          icon: Icons.refresh_rounded,
+          color: AppColors.sky,
+          height: 62,
+          fontSize: 24,
+          onPressed: onRetry,
+        ),
       ],
     );
   }
