@@ -36,7 +36,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1700));
     await tester.pump();
 
-    expect(find.text('Soru 2 / 10'), findsOneWidget,
+    expect(find.text('Soru 2 / 5'), findsOneWidget,
         reason: 'Yanlış cevaptan sonra sonraki soruya geçmeli');
     expect(find.text('ÇEVİR'), findsOneWidget,
         reason: 'Yeni soru ÇEVİR ile başlamalı');

@@ -2,7 +2,7 @@
 
 Proje dizini: `/Users/ibrahimyasar/Desktop/mathSpin`
 Depo: https://github.com/ibrahimyasar68/math_spin (main ile senkron)
-Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **41 test geçiyor**.
+Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **43 test geçiyor**.
 
 ## Yapı
 
@@ -66,17 +66,22 @@ Basamaklar: Blok 1 (K1-10) 1 basamak · Blok 2 (K11-20) 2 · Blok 3 (K21-30) 3
 
 ## Oyun mekaniği — 2 BLOKLU SÜRÜM (yürürlükte, 28 Ağu 2026'dan beri)
 
-**20 kategori**, 10'luk **2 bant**. Toplam **170 soru** (bant başına 85).
+**20 kategori**, 10'luk **2 bant**. Her kategoride **5 soru**, toplam
+**100 soru** (bant başına 50).
+
+Soru adedi eskiden bant içinde 10'dan 5'e kademeli azalıyordu; **28 Ağu 2026'da
+kaldırıldı** — her kategori aynı uzunlukta, tek değişen zorluk.
 
 | Sıra | Soru | Geçmek için | Hata hakkı | İşlemler | Blok 1 | Blok 2 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| 1-3 | 10 | 8 | 2 | + − | K1-3 | K11-13 |
-| 4-5 | 10 | 8 | 2 | + − × | K4-5 | K14-15 |
-| 6 | 9 | 8 | 1 | + − × ÷ | K6 | K16 |
-| 7 | 8 | 7 | 1 | + − × ÷ | K7 | K17 |
-| 8 | 7 | 6 | 1 | + − × ÷ | K8 | K18 |
-| 9 | 6 | 5 | 1 | + − × ÷ | K9 | K19 |
-| 10 | 5 | 4 | 1 | + − × ÷ | K10 | K20 |
+| 1-3 | 5 | 4 | 1 | + − | K1-3 | K11-13 |
+| 4-5 | 5 | 4 | 1 | + − × | K4-5 | K14-15 |
+| 6-10 | 5 | 4 | 1 | + − × ÷ | K6-10 | K16-20 |
+
+**Barajın anlamı değişti:** 5 soruda %80 = 4 doğru, yani **her kategoride tek
+yanlış hakkı** var. Eskiden bandın ilk beş kategorisinde 10 soruda 2 yanlış
+hakkı vardı; artık baştan sona tek. İstenirse baraj `ResultScreen._passScore`
+ile gevşetilir (%60 → 3 doğru yeter).
 
 Görsel çizelge (2 bloklu):
 https://claude.ai/code/artifact/bf3c4962-654a-4482-a585-f0fa0bae287c
@@ -87,8 +92,7 @@ olamaz — 1 basamağın altına inilecek aralık yok, `_operandRange` içindeki
 `digits > 1` koşulu o bandı zaten dışarıda bırakır. Oran düşük tutuldu: amaç
 zorluğu seyreltmek değil, iki basamaklı sorularda tekdüzeliği kırmak.
 
-Değişmeyenler: yüzde puanlama ve %80 barajı, soru adedinin bant içinde azalması,
-iki soru biçimi (`A op B = ?` / `A op ? = C`), çarpan-bölen 2-9, tam bölünen
+Değişmeyenler: yüzde puanlama ve %80 barajı, iki soru biçimi (`A op B = ?` / `A op ? = C`), çarpan-bölen 2-9, tam bölünen
 bölmeler, negatif olmayan çıkarma.
 
 **Geçiş notu:** `ProgressStore.init` kayıtlı kategoriyi `1..maxCategory`
@@ -102,9 +106,8 @@ atanır, resim **10 gerçek yapboz parçasına** bölünür ve kapalı durur.
 
 | Olay | Sonuç |
 |---|---|
-| Oyun bitti, puan **≥ %80** | Rastgele **bir parça açılır** |
-| Oyun bitti, puan **< %80** | Parça açılmaz |
-| Her oyundan sonra | **4 şık** sorulur (doğru + 3 rastgele yanlış) |
+| Puan **≥ %80** | Rastgele **bir parça açılır** + **4 şık** sorulur (doğru + 3 rastgele yanlış) |
+| Puan **< %80** | **Yapboz hiç gösterilmez**: "BAŞARISIZ" notu, kategori baştan tekrar edilir |
 | Tahmin **doğru** | Kategori geçilir → pasta → sonraki kategori |
 | Tahmin **yanlış** | Kategori aynı kalır, açık parçalar korunur |
 
@@ -119,10 +122,11 @@ iki oyun arasında tek durak olsun diye sonuç ekranının gövdesine kondu
    **12 hayvana** çıktı ve şıklar havuzun tamamı değil **4 tane**; kör tahminde
    isabet 1/3'ten 1/4'e indi, ezberleme yolu kapandı.
 2. *Akış uzundu* — ayrı yapboz ekranı kaldırıldı (yukarıya bak).
-3. *Baraj altında tahmin yoktu* — kalktı, artık her oyundan sonra tahmin var.
-   **Sonucu bilinçli kabul edildi**: 4 şıkta kör tahmin ortalama ~4 oyunda bir
-   kategori geçirir, yani matematik yapmadan da ilerlenebilir. Matematiği
-   anlamlı tutan tek şey parçaların yalnızca barajla gelmesi.
+3. *Baraj altında tahmin yoktu* — önce kaldırıldı (her oyundan sonra tahmin),
+   sonra **28 Ağu 2026'da geri alındı ve sertleştirildi**: baraj altında yapboz
+   hiç açılmıyor, ekran "BAŞARISIZ" diyor ve kategori baştan tekrar ediliyor.
+   Böylece rastgele şıkka basarak ilerleme yolu tamamen kapandı; matematik
+   yeniden zorunlu.
 4. *Görünüş* — düz dikdörtgen ızgara yerine **tırtıklı yapboz parçaları**.
 
 Teknik notlar:
@@ -145,7 +149,7 @@ Teknik notlar:
 ## Bitirme senaryosu ve yıldızlar
 
 - K20'de resim doğru bilinince: **10 mumlu final pastası**
-  → **zafer ekranı** (taçlı maskot, "ŞAMPİYON!", 20/170/2 özeti, konfeti+alkış).
+  → **zafer ekranı** (taçlı maskot, "ŞAMPİYON!", 20/100/2 özeti, konfeti+alkış).
   Özetteki üç sayı da koddan türer (`maxCategory`, soru toplamı, `bandCount`).
 - Her bitiriş **1 yıldız**. Yıldızlar kalıcı; baştan başlamak geri almaz.
 - **Ana ekranda** avatarın iki yanında tek sütun, dengeli dağılım
@@ -198,7 +202,8 @@ Teknik notlar:
   veri güvenliği (**veri toplanmıyor**), kısa beyanlar
 - Mağaza görselleri: ikon, feature graphic (1024×500),
   **5 telefon ekran görüntüsü** (`store_assets/`, git'te değil)
-- Kısa + tam açıklama (40 kategoriye göre güncel)
+- Kısa + tam açıklama **(ESKİ: 40 kategori/340 soru anlatıyor, yapbozdan
+  söz etmiyor — aşağıdaki toplu güncellemede yenilenecek)**
 - **`.aab` kapalı teste yüklendi**
 
 **Sırada**
@@ -206,6 +211,34 @@ Teknik notlar:
    14 gün** şartı. Sayaç, kişiler **katılımı onaylayınca** başlar; listeye
    eklenmek yetmez. 15-18 kişi eklenmesi önerildi (tampon).
 2. 14 gün dolunca **Production**'a başvuru.
+
+## Play sürüm güncellemesi — TOPLU YAPILACAK
+
+Karar: mağaza tarafı **parça parça değil, tek seferde** güncellenecek. Kodda
+biriken değişiklikler (2 bloklu plan, yapboz, ÇEVİR konumu, ikon) Play'de
+yayınlanmadı; aşağıdakiler o gün topluca yapılacak. **İstenmeden başlanmayacak.**
+
+Yapılacaklar listesi:
+
+1. **Sürüm numarası** — `pubspec.yaml` `1.0.0+2` → en az `+3`. Kullanıcıdaki
+   başlatıcı ikonu ve yapboz ancak yeni `.aab` ile gider.
+2. **`.aab` üretimi ana dizinde** — `flutter build appbundle --release`.
+   Worktree'de `android/key.properties` olmadığı için oradan alınan yapı
+   sessizce debug'a düşer ve Play reddeder.
+3. **Türkçe mağaza metni** (Console → Ana mağaza girişi). Mevcut metin 40
+   kategori/340 soru diyor; doğrusu **20 kategori / 100 soru**. Yapbozdan hiç
+   söz etmiyor. Güncellenen metin `store/listing_tr.md`'ye de yazılsın ki
+   geçmişi git'te dursun.
+4. **İngilizce metin** — `store/listing_en.md` aynı iki sebeple eski; oradaki
+   sayılar ve içerik yenilenmeli. (Arayüz Türkçe olduğunu söyleyen paragraf
+   arayüz yerelleştirilmediyse kalsın.)
+5. **Ekran görüntüleri** — 5 telefon görüntüsü artık oyunu yansıtmıyor: sonuç
+   ekranı baştan tasarlandı, yapboz eklendi. Yeniden çekilmeli
+   (`store_assets/`, git'te değil).
+6. **Sürüm notları** ("Yenilikler") — yapboz, 12 hayvan, yeni sonuç ekranı,
+   ÇEVİR konumu, ikon rötuşu.
+7. Feature graphic ve app content beyanları değişmiyor; 512×512 ikon zaten
+   yüklendi.
 
 **Yapılmayı bekleyen (opsiyonel)**
 - 🔑 **Keystore yedeği** — dosyayı harici diske kopyalamak ve parolayı parola
@@ -249,6 +282,10 @@ Betik kaynaktan **birebir tekrar üretilebilir** (aynı SHA-1). Bir kez çalış
   + `install`, sonra **APK içindeki dosyanın hash'ini yereldekiyle karşılaştır**.
 - Emülatörde prefs dosyası ancak uygulama bir kez çalıştıktan sonra oluşur;
   kategori/yıldız ayarlamak için önce onboarding'i geçmek gerekiyor.
+- **Emülatörde test etmeden önce main'e merge et.** Worktree'deki commit'siz
+  değişiklikler ana dizine yansımaz; oradan alınan yapı eski kodu içerir.
+  Bu oturumda iki kez yaşandı (ÇEVİR konumu ve 5 soruluk kategori "değişmemiş"
+  göründü). Kural: **commit → merge → build**, sırasıyla.
 - **Worktree'de `android/key.properties` yok** (gitignore'da). Worktree içinde
   `flutter build appbundle --release` çalıştırılırsa yapı sessizce **debug**
   imzasına düşer ve Play reddeder. Yayın yapıları ana dizinde alınmalı.

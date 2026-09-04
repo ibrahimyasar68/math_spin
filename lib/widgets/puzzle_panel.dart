@@ -17,8 +17,13 @@ import 'puzzle_board.dart';
 /// koymamak için sonuç ekranının gövdesinde durur. Tahmin yapılınca kısa bir
 /// geri bildirimin ardından [onGuessed] çağrılır; yönlendirme kararı (kategori
 /// geçişi, pasta, oyuna dönüş) sonuç ekranına aittir.
+///
+/// **Yalnızca baraj geçildiğinde gösterilir.** Baraj altında kategori
+/// başarısız sayılıp baştan tekrar edildiği için yapboz hiç açılmaz; bu yüzden
+/// buradaki metinler "parça kazandın" durumunu varsayar.
 class PuzzlePanel extends StatefulWidget {
-  /// Bu turda açılan parça (baraj geçilmediyse `null`) — animasyonla girer.
+  /// Bu turda açılan parça — animasyonla girer. Resmin tamamı zaten açıksa
+  /// açılacak parça kalmadığı için `null` olur.
   final int? newPiece;
 
   /// Tahminin ardından çağrılır; parametre doğru bilinip bilinmediğidir.
@@ -76,19 +81,10 @@ class _PuzzlePanelState extends State<PuzzlePanel> {
               hint: 'Parçaların duruyor, yeni bir oyunla devam!',
             );
     }
-    if (revealed == 0) {
-      return (
-        title: 'Bu hangi hayvan?',
-        hint: 'Parça açmak için 80 puan gerekiyor — ama tahmin edebilirsin.',
-      );
-    }
-    if (widget.newPiece != null) {
-      return (title: 'Yeni parça açıldı!', hint: 'Sence bu hangi hayvan?');
-    }
-    if (revealed == PuzzleStore.pieceCount) {
+    if (revealed == PuzzleStore.pieceCount && widget.newPiece == null) {
       return (title: 'Resmin tamamı açık!', hint: 'Peki bu hangi hayvan?');
     }
-    return (title: 'Bu hangi hayvan?', hint: 'Parça kazanmak için 80 puan.');
+    return (title: 'Yeni parça açıldı!', hint: 'Sence bu hangi hayvan?');
   }
 
   @override
