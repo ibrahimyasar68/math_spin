@@ -215,15 +215,20 @@ Teknik notlar:
     çöz, yapboz parçası kazan!"
   - **5 telefon ekran görüntüsü** yenilendi — gerçek emülatörden alındı,
     1080×1920 (9:16), `store_assets/yeni_ekran_goruntuleri/`
+- **İngilizce mağaza metni** (`store/listing_en.md`) 5 Eyl 2026'da güncel oyuna
+  göre yeniden yazıldı: 20 kategori, 5 soruluk kategoriler, yapboz + 12 hayvan,
+  2 bantlı basamak planı. Türkçe metinle aynı iskelet. Ad 24, kısa açıklama 69,
+  tam açıklama 3110 karakter — üçü de sınır içinde. **Console'a girilmedi**;
+  kopyala-yapıştır bekliyor (İngilizce listeleme açılacaksa).
 
 **Sırada**
 1. **Test kullanıcıları** — kişisel hesap olduğu için **12+ testçi × kesintisiz
    14 gün** şartı. Sayaç, kişiler **katılımı onaylayınca** başlar; listeye
    eklenmek yetmez. 15-18 kişi eklenmesi önerildi (tampon).
 2. 14 gün dolunca **Production**'a başvuru.
-3. **İngilizce listeleme** ertelendi — `store/listing_en.md` hâlâ 40 kategori/
-   340 soruyu anlatıyor ve yapbozdan söz etmiyor, kullanılmadan önce
-   yenilenmeli.
+3. **İngilizce listelemeyi Console'a girmek** — metin hazır
+   (`store/listing_en.md`), karar verilmedi: arayüz Türkçe olduğu için metnin
+   sonunda dil uyarısı duruyor. Ekran görüntüleri de Türkçe arayüzü gösteriyor.
 
 **Ekran görüntüsü üretme notu:** Flutter'ın widget testinden render almak
 işe yaramıyor — test ortamı emojileri ve `⌫` (U+232B) karakterini kutu
