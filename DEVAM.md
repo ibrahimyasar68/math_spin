@@ -205,56 +205,32 @@ Teknik notlar:
 - App content beyanlarının **tamamı**: uygulama erişimi, reklamlar (yok),
   içerik derecelendirmesi (3+), hedef kitle (6-8 / 9-12, Families Policy),
   veri güvenliği (**veri toplanmıyor**), kısa beyanlar
-- Mağaza görselleri: ikon, feature graphic (1024×500),
-  **5 telefon ekran görüntüsü** (`store_assets/`, git'te değil)
-- Kısa + tam açıklama **(ESKİ: 40 kategori/340 soru anlatıyor, yapbozdan
-  söz etmiyor — aşağıdaki toplu güncellemede yenilenecek)**
-- **`.aab` kapalı teste yüklendi**
+- Mağaza görselleri: ikon (512, yenilendi), feature graphic (1024×500)
+- **5 Eyl 2026 toplu güncellemesi tamamlandı:**
+  - versionCode **4** (1.1.0) kapalı teste **yayınlandı** — 20 kategori,
+    5 soruluk kategoriler, yapboz, yeni ikon
+  - Türkçe **tam açıklama** yenilendi (metin `store/listing_tr.md`'de)
+  - Türkçe **kısa açıklama**: "Çocuklar için matematik: çarkı çevir, işlemi
+    çöz, yapboz parçası kazan!"
+  - **5 telefon ekran görüntüsü** yenilendi — gerçek emülatörden alındı,
+    1080×1920 (9:16), `store_assets/yeni_ekran_goruntuleri/`
 
 **Sırada**
 1. **Test kullanıcıları** — kişisel hesap olduğu için **12+ testçi × kesintisiz
    14 gün** şartı. Sayaç, kişiler **katılımı onaylayınca** başlar; listeye
    eklenmek yetmez. 15-18 kişi eklenmesi önerildi (tampon).
 2. 14 gün dolunca **Production**'a başvuru.
+3. **İngilizce listeleme** ertelendi — `store/listing_en.md` hâlâ 40 kategori/
+   340 soruyu anlatıyor ve yapbozdan söz etmiyor, kullanılmadan önce
+   yenilenmeli.
 
-## Play sürüm güncellemesi — TOPLU YAPILACAK
-
-Karar: mağaza tarafı **parça parça değil, tek seferde** güncellenecek. Kodda
-biriken değişiklikler (2 bloklu plan, yapboz, ÇEVİR konumu, ikon) Play'de
-yayınlanmadı; aşağıdakiler o gün topluca yapılacak. **İstenmeden başlanmayacak.**
-
-Yapılacaklar listesi:
-
-1. **Sürüm numarası** — `pubspec.yaml` `1.0.0+2` → en az `+3`. Kullanıcıdaki
-   başlatıcı ikonu ve yapboz ancak yeni `.aab` ile gider.
-2. **`.aab` üretimi ana dizinde** — `flutter build appbundle --release`.
-   Worktree'de `android/key.properties` olmadığı için oradan alınan yapı
-   sessizce debug'a düşer ve Play reddeder.
-3. **Türkçe mağaza metni** (Console → Ana mağaza girişi). Mevcut metin 40
-   kategori/340 soru diyor; doğrusu **20 kategori / 100 soru**. Yapbozdan hiç
-   söz etmiyor. Güncellenen metin `store/listing_tr.md`'ye de yazılsın ki
-   geçmişi git'te dursun.
-4. **İngilizce metin** — `store/listing_en.md` aynı iki sebeple eski; oradaki
-   sayılar ve içerik yenilenmeli. (Arayüz Türkçe olduğunu söyleyen paragraf
-   arayüz yerelleştirilmediyse kalsın.)
-5. **Ekran görüntüleri** — 5 telefon görüntüsü artık oyunu yansıtmıyor: sonuç
-   ekranı baştan tasarlandı, yapboz eklendi. Yeniden çekilmeli
-   (`store_assets/`, git'te değil).
-6. **Sürüm notları** ("Yenilikler") — yapboz, 12 hayvan, yeni sonuç ekranı,
-   ÇEVİR konumu, ikon rötuşu.
-7. Feature graphic ve app content beyanları değişmiyor; 512×512 ikon zaten
-   yüklendi.
-
-**Yapılmayı bekleyen (opsiyonel)**
-- 🔑 **Keystore yedeği** — dosyayı harici diske kopyalamak ve parolayı parola
-  yöneticisine yazmak **hâlâ yapılmadı**; adımlar ve doğrulama komutu
-  `IMZALAMA.md`'de. Not: Play App Signing etkinse kayıp geri dönüşsüz değil,
-  upload anahtarı Google'a başvuruyla yenilenebilir (birkaç iş günü) —
-  Play Console → Uygulama bütünlüğü ekranından teyit et.
-- ~~İngilizce mağaza metni~~ → `store/listing_en.md` hazır. Uygulama arayüzü
-  Türkçe olduğu için metnin sonunda bunu söyleyen bir paragraf var; arayüz
-  yerelleştirilirse o paragraf silinmeli.
-- ~~İkonun iç kısmındaki soluk çerçeve izi~~ → **düzeltildi** (aşağıya bak).
+**Ekran görüntüsü üretme notu:** Flutter'ın widget testinden render almak
+işe yaramıyor — test ortamı emojileri ve `⌫` (U+232B) karakterini kutu
+basıyor. Gerçek emülatörden `adb exec-out screencap` ile alındı; emülatör
+1080×2400 (9:20) olduğu için durum/gezinme çubukları kırpılıp kalan 9:16'ya
+oturtuldu (içerik kırpmak yerine kenar pikseli yanlara uzatıldı, gradyan
+sürdüğü için dikiş görünmüyor). Kayıtlı ilerlemeyi ayarlamak için
+`adb root` + `shared_prefs/FlutterSharedPreferences.xml` düzenlendi.
 
 ## İkon (28 Ağu 2026'da düzeltildi)
 
