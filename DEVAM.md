@@ -183,7 +183,9 @@ Teknik notlar:
 ## Android / yayın yapılandırması
 
 - `applicationId` / namespace: **com.iylabs.mathspin** (kalıcı, değiştirilemez)
-- Uygulama adı: **MathSpin** · versionCode **2**, versionName **1.0.0**
+- Uygulama adı: **MathSpin** · versionCode **3**, versionName **1.1.0**
+  (Play'deki kapalı test sürümü hâlâ versionCode 2 — 40 kategori/340 soru,
+  yapbozsuz, eski ikonlu. Bu oturumun hiçbir değişikliği orada yok.)
 - İmzalama: `android/key.properties` → `~/mathspin-upload.jks` (alias `upload`).
   Gradle key.properties yoksa debug'a düşer. `.aab` upload anahtarıyla imzalı
   olduğu doğrulandı (CN="Ibrahim YASAR").
