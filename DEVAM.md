@@ -183,7 +183,10 @@ Teknik notlar:
 ## Android / yayın yapılandırması
 
 - `applicationId` / namespace: **com.iylabs.mathspin** (kalıcı, değiştirilemez)
-- Uygulama adı: **MathSpin** · versionCode **3**, versionName **1.1.0**
+- Uygulama adı: **MathSpin** · versionCode **4**, versionName **1.1.0**
+  (versionCode 3 Console'da taslakken değiştirildi: ana ekran taşma
+  düzeltmesi ve 6-12 yaş ifadesi ona yetişmemişti. versionName aynı
+  kaldı, sürüm notu hâlâ geçerli.)
   (Play'deki kapalı test sürümü hâlâ versionCode 2 — 40 kategori/340 soru,
   yapbozsuz, eski ikonlu. Bu oturumun hiçbir değişikliği orada yok.)
 - İmzalama: `android/key.properties` → `~/mathspin-upload.jks` (alias `upload`).
