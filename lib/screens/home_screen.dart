@@ -101,8 +101,11 @@ class _HomeScreenState extends State<HomeScreen>
                   children: [
                     const Spacer(),
                     // Maskot + arkasında genişleyen ışık halkası (warp).
+                    //
+                    // Yükseklik 160'tan 152'ye çekildi: sütunun sabit içeriği
+                    // 360x640'ta (projenin küçük ekran ölçüsü) 5 px taşıyordu.
                     SizedBox(
-                      height: 160,
+                      height: 152,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
@@ -222,15 +225,15 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
-                      '10 yaş altı çocuklar için',
+                      '6-12 yaş çocuklar için',
                       style: GoogleFonts.nunito(
                         fontSize: 16,
                         color: Colors.white54,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
                 ),
               );

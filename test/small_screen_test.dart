@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mathspin/services/settings_store.dart';
+import 'package:mathspin/screens/home_screen.dart';
 import 'package:mathspin/screens/game_screen.dart';
 import 'package:mathspin/widgets/candy_button.dart';
 
@@ -35,5 +38,22 @@ void main() {
     await tester.tap(key9);
     await tester.pump();
     expect(find.text('9'), findsWidgets);
+  });
+
+  testWidgets('Küçük ekranda ana ekran taşmadan sığar', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues({});
+    SettingsStore.instance.onboarded = true;
+
+    // Taşma olursa pump sırasında hata fırlar; testin geçmesi sığdığını söyler.
+    await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
+    await tester.pump();
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    expect(find.text('BAŞLA'), findsOneWidget);
+    expect(find.text('MathSpin'), findsOneWidget);
   });
 }
