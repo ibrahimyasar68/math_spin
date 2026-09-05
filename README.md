@@ -1,6 +1,6 @@
 # MathSpin 🎰 – Çocuklar için Matematik Oyunu
 
-10 yaşından küçük çocuklar için slot makinesi temalı, eğlenceli bir matematik
+6-12 yaş çocuklar için slot makinesi temalı, eğlenceli bir matematik
 alıştırma oyunu. Çocuk "ÇEVİR" butonuna basar, çarklar döner ve karşısına bir
 matematik sorusu çıkar.
 
