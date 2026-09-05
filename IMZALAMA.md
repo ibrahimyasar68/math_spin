@@ -7,13 +7,15 @@ doğrulanır" bilgisi durur.
 
 | | |
 |---|---|
-| Dosya | `~/mathspin-upload.jks` (2.744 bayt, 7 Temmuz 2026) |
+| Dosya | `~/keyStore/mathspin-upload.jks` (2.744 bayt, 7 Temmuz 2026) |
 | Alias | `upload` |
 | Sahip | `CN="Ibrahim YASAR", OU=Software, O="Personal", L=Ankara, ST=Turkey, C=TR` |
 | Geçerlilik | 7 Tem 2026 → 22 Kas 2053 |
 | Algoritma | 2048-bit RSA, SHA256withRSA |
 | SHA-1 | `1C:83:59:A8:3C:A2:76:A6:DF:0D:6E:4E:29:13:E8:DC:CF:AA:D2:DC` |
 | SHA-256 | `B0:68:B5:10:6E:E0:BB:4F:45:EB:AA:32:BC:40:BB:44:2D:72:3F:25:B4:D0:22:5C:E0:73:D8:AB:12:AA:54:4F` |
+
+**Anahtar 5 Eyl 2026'da `~/` altından `~/keyStore/` içine taşındı**; `key.properties` eski yolu gösterdiği için release yapısı "keystore bulunamadı" diye patlamıştı, yol güncellendi. Taşınan dosyanın aynı anahtar olduğu aşağıdaki SHA-256 ile doğrulandı.
 
 Gradle bu anahtarı `android/key.properties` üzerinden bulur. O dosya
 `.gitignore`'da (`key.properties`, `**/*.jks`) — depoya **hiç girmedi**,
@@ -22,7 +24,7 @@ düşer; Play böyle bir `.aab`'ı reddeder.
 
 ## Yedeklenecek dört şey
 
-1. `~/mathspin-upload.jks` dosyasının kendisi
+1. `~/keyStore/mathspin-upload.jks` dosyasının kendisi
 2. `storePassword`
 3. `keyPassword`
 4. `keyAlias` (`upload`)
@@ -38,7 +40,8 @@ Parolalar olmadan `.jks` işe yaramaz; dosya olmadan parola işe yaramaz.
 Kopyalamayı sen yapmalısın; parola bende görünmesin diye komutu çalıştırmadım:
 
 ```bash
-cp ~/mathspin-upload.jks /Volumes/<DISK_ADI>/mathspin-upload-$(date +%Y%m%d).jks
+cp ~/keyStore/mathspin-upload.jks \
+   /Volumes/<DISK_ADI>/mathspin-upload-$(date +%Y%m%d).jks
 ```
 
 ## Yedeğin sağlam olduğunu doğrulama
