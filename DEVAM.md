@@ -1,7 +1,9 @@
 # Buradan devam — MathSpin (Flutter çocuk matematik oyunu)
 
 Proje dizini: `/Users/ibrahimyasar/Desktop/mathSpin`
-Depo: https://github.com/ibrahimyasar68/math_spin (main ile senkron)
+Depo: https://github.com/ibrahimyasar68/math_spin — yerel `main` ile
+`origin/main` senkron; son push **5 Eyl 2026**, `d9c9253` (İngilizce
+mağaza metni).
 Flutter 3.35.6, null-safe, setState tabanlı. `flutter analyze` temiz, **43 test geçiyor**.
 
 ## Yapı
@@ -218,8 +220,10 @@ Teknik notlar:
 - **İngilizce mağaza metni** (`store/listing_en.md`) 5 Eyl 2026'da güncel oyuna
   göre yeniden yazıldı: 20 kategori, 5 soruluk kategoriler, yapboz + 12 hayvan,
   2 bantlı basamak planı. Türkçe metinle aynı iskelet. Ad 24, kısa açıklama 69,
-  tam açıklama 3110 karakter — üçü de sınır içinde. **Console'a girilmedi**;
-  kopyala-yapıştır bekliyor (İngilizce listeleme açılacaksa).
+  tam açıklama 3110 karakter — üçü de sınır içinde. Sayılar koddan doğrulandı
+  (`bandCount`/`maxCategory`, `_passScore`, `puzzle_image.dart`).
+  Depoda: `fb70cb6` → main'e `d9c9253` ile alındı, GitHub'a push edildi.
+  **Console'a girilmedi**; kopyala-yapıştır bekliyor.
 
 **Sırada**
 1. **Test kullanıcıları** — kişisel hesap olduğu için **12+ testçi × kesintisiz
