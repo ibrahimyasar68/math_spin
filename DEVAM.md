@@ -22,6 +22,7 @@ store/listing_tr.md  -> Türkçe kısa açıklama (ad + tam açıklama Console'd
                         doldurulacak)
 tools/ikon_duzelt.py -> ikon kart izini temizleyen betik
 IMZALAMA.md          -> anahtar yedekleme ve doğrulama (parola içermez)
+README.md            -> depo ön kapısı; 5 Eyl 2026'da güncel oyuna göre yenilendi
 test/     10 dosya
 ```
 
@@ -270,7 +271,6 @@ Betik kaynaktan **birebir tekrar üretilebilir** (aynı SHA-1). Bir kez çalış
 - **Worktree'de `android/key.properties` yok** (gitignore'da). Worktree içinde
   `flutter build appbundle --release` çalıştırılırsa yapı sessizce **debug**
   imzasına düşer ve Play reddeder. Yayın yapıları ana dizinde alınmalı.
-- `README.md` güncel değil: 20 soruluk eski sürümü ve Fredoka'yı anlatıyor.
 - Oyun ekranı koordinatları (1080×2400 emülatör): klavye satırları
   y≈1537/1710/1880/2050, sütunlar x≈207/540/872, **TAMAM ve ÇEVİR aynı yerde:
   y≈2245** (ÇEVİR eskiden 2040'taydı, aynı hizaya alındı).
